@@ -1,0 +1,72 @@
+/* Стили для таблицы */
+.act_filter_buttons {
+	margin-top: 20px;
+}
+.filter_wrapper {
+	display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 25px;
+}
+.input-group {
+	width: 100%;
+}
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 20px 0;
+	font-size: 1em;
+	font-family: 'Arial', sans-serif;
+}
+.table thead {
+	background-color: #f2f2f2; /* Светлый фон для заголовков */
+}
+.table th, .table td {
+	padding: 12px 15px; /* Поля внутри ячеек */
+	text-align: left;
+	border-bottom: 1px solid #dddddd; /* Нежная граница снизу */
+}
+.table th {
+	color: #333; /* Цвет текста заголовка */
+}
+.table tr:nth-child(even) {
+	background-color: #f9f9f9; /* Чередование фона для строк */
+}
+.table tr:hover {
+	background-color: #e0e0e0; /* Цвет при наведении */
+}
+/* Стили для пагинации */
+#pagination {
+	display: flex;
+	justify-content: center; /* Центрирование кнопок */
+	margin: 20px 0;
+	flex-wrap: wrap;
+}
+#pagination a {
+	padding: 10px 15px; /* Поля для кнопок */
+	margin: 5px; /* Отступы между кнопками */
+	text-decoration: none;
+	color: #007bff; /* Цвет текста */
+	background-color: #e9ecef; /* Светлый фон кнопки */
+	border: 1px solid #ced4da; /* Граница кнопки */
+	border-radius: 5px; /* Скругление углов */
+	transition: background-color 0.3s; /* Плавный переход */
+}
+#pagination a:hover {
+	background-color: #007bff; /* Цвет фона при наведении */
+	color: white; /* Цвет текста при наведении */
+}
+#pagination a.active {
+	background-color: #007bff !important; /* Цвет фона активной кнопки */
+	color: white !important; /* Цвет текста активной кнопки */
+	border: 1px solid #007bff; /* Граница активной кнопки */
+}
+#pagination a:disabled {
+	background-color: #e9ecef !important; /* Фон для неактивной кнопки */
+	color: #6c757d !important; /* Цвет текста для неактивной кнопки */
+	cursor: not-allowed; /* Курсор для неактивной кнопки */
+}
+@media (max-width: 768px) {
+    .filter_wrapper {
+		grid-template-columns: 1fr;
+    }
+}

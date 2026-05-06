@@ -1,0 +1,62 @@
+# Игнорировать всё, что связано с изображениями и медиа
+content/files/images/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.svg
+
+# Игнорировать временные и отладочные папки
+modules/debug/tmp/
+cp/tmp/
+cp/tmp/suppliers_api_log/
+*.log
+php-e.log
+
+# Игнорировать архивы и бэкапы
+*.zip
+*.tar.gz
+*.rar
+*.7z
+backup_*.zip
+
+# Игнорировать библиотеки и вендорские папки
+lib/
+vendor/
+**/lib/
+**/vendor/
+
+# Игнорировать виртуальные окружения Python
+venv/
+env/
+.venv/
+**/venv/
+**/env/
+pyprices/pyprices/lib/
+
+# Игнорировать системные и временные файлы
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.cache
+*.bak
+*.old
+*.orig
+
+# Игнорировать файлы конфигурации IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# composer.phar и другие инструменты
+composer.phar
+*.phar
+
+# CSV и документы (если не нужны в гите)
+*.csv
+*.docx
+*.xlsx

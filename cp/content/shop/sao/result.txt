@@ -1,0 +1,16 @@
+<pre>stdClass Object
+(
+    [addToBasketResult] => stdClass Object
+        (
+            [FromBasket] => stdClass Object
+                (
+                    [global_id] => 0
+                    [reference] => 32365
+                    [comment] => Не найдена цена для детали, поставщик KTV, направление KTV
+                )
+
+        )
+
+)
+</pre>
+

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cloudflare Browser Parser Test</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .url-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .result { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; max-height: 400px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Cloudflare Browser Parser</h1>
+        
+        <div class="url-box">
+            <input type="text" id="url" placeholder="https://example.com" value="https://exist.ru/Catalog/Goods/18/14/DF40D2D6">
+            <button onclick="testParse()">Парсить</button>
+            <button onclick="testMarkdown()">Markdown</button>
+            <button onclick="testScreenshot()">Скриншот</button>
+        </div>
+        
+        <div class="result" id="result" style="display:none;">
+            <h3>Результат:</h3>
+            <pre id="content"></pre>
+        </div>
+    </div>
+    
+    <script>
+    async function testParse() {
+        const url = document.getElementById('url').value;
+        
+        try {
+            const response = await fetch('cloudflare_test.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url, type: 'html' })
+            });
+            
+            const data = await response.json();
+            document.getElementById('content').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('result').style.display = 'block';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+    
+    async function testMarkdown() {
+        const url = document.getElementById('url').value;
+        
+        try {
+            const response = await fetch('cloudflare_test.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url, type: 'markdown' })
+            });
+            
+            const data = await response.json();
+            document.getElementById('content').textContent = data.content || 'No content';
+            document.getElementById('result').style.display = 'block';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+    
+    async function testScreenshot() {
+        const url = document.getElementById('url').value;
+        
+        try {
+            const response = await fetch('cloudflare_test.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: url, type: 'screenshot' })
+            });
+            
+            const data = await response.json();
+            if (data.image) {
+                document.getElementById('content').innerHTML = `<img src="data:image/png;base64,${data.image}">`;
+            } else {
+                document.getElementById('content').textContent = 'No screenshot';
+            }
+            document.getElementById('result').style.display = 'block';
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
+    </script>
+</body>
+</html>

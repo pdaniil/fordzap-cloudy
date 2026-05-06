@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Демо: шаблон modern — part_search_page_1</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" href="demo.css" />
+	<style>
+		/* страница-оболочка только для превью */
+		body { margin: 0; padding: 1rem; background: #e8eef5; min-height: 100vh; }
+		.demo-page { max-width: 1200px; margin: 0 auto; }
+		.demo-banner {
+			font: 14px/1.5 Inter, sans-serif; color: #334; margin-bottom: 1rem; padding: 12px 16px;
+			background: #fff; border-radius: 8px; border-left: 4px solid #4294ff;
+		}
+		.demo-banner code { background: #f0f4fa; padding: 2px 6px; border-radius: 4px; }
+	</style>
+</head>
+<body>
+	<div class="demo-page">
+		<div class="demo-banner">
+			Статическая разметка под шаблон <strong>modern</strong>. В продакшене те же классы и <code>demo.css</code>
+			(с префиксом <code>#products_area</code>) вставляются через <code>getCmsOverrideCss()</code>.
+			Откройте файл в браузере с этой папки.
+		</div>
+
+		<!-- как на сайте: контейнер выдачи -->
+		<div id="products_area">
+			<div class="psp1-m-toolbar__margin" style="text-align:right;padding-bottom:8px;">
+				<label><input type="checkbox" /> показать закуп (пример панели наценки)</label>
+			</div>
+
+			<div class="psp1-m-root" id="all_table_products">
+				<div class="psp1-m-offers-head-wrap">
+					<div class="psp1-m-offers-head" role="row">
+						<div class="psp1-m-head__cell psp1-m-head__cell--brand" role="columnheader">Производитель</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--sku" role="columnheader">Артикул</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--title" role="columnheader">Наименование</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--stock" role="columnheader">Наличие</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--eta" role="columnheader">Срок</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--info" role="columnheader">Инфо</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--price psp1-m-head__cell--sorted" role="columnheader">Цена, ₽</div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--cart" role="columnheader"></div>
+						<div class="psp1-m-head__cell psp1-m-head__cell--brandline" role="columnheader" aria-hidden="true"></div>
+					</div>
+				</div>
+
+				<div class="psp1-m-offers-body">
+					<div class="psp1-m-section">
+						<h3 class="psp1-m-section__title">Запрошенный артикул</h3>
+					</div>
+
+					<!-- строка 1: с кнопкой «Показать ещё» -->
+					<div class="psp1-m-offer">
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brand">
+							<span title="BOSCH">BOSCH</span>
+							<div class="psp1-m-toggle-more"><span style="line-height:1.4em;">Показать еще</span></div>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--sku">
+							<a class="psp1-m-link" href="#">0 986 424 674</a>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--title">
+							<span title="Колодки дисковые передние">Колодки дисковые передние</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--stock">
+							<span>4</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--eta">
+							<span>На складе</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--info">
+							<span class="psp1-m-info">
+								<a href="#" title="Фото"><i class="fa fa-camera" style="font-size:.8em"></i></a>
+								<a href="#" title="Склад"><i class="fa fa-home"></i></a>
+							</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--price">3 240 ₽</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--cart">
+							<div style="text-align:center;line-height:1em;">
+								<table>
+									<tr><td><a href="#"><i class="fa fa-shopping-cart"></i></a></td></tr>
+									<tr><td>
+										<div style="text-align:center;background:#f9f9f9;border:1px solid #ddd;padding:2px;border-radius:3px;">
+											<table><tr>
+												<td><a class="psp1-m-qty-btn" href="#"><i class="fa fa-minus"></i></a></td>
+												<td><input type="text" value="1" style="width:28px;text-align:center;" id="count_need_demo1" /></td>
+												<td><a class="psp1-m-qty-btn" href="#"><i class="fa fa-plus"></i></a></td>
+											</tr></table>
+										</div>
+									</td></tr>
+								</table>
+							</div>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brandline" style="background:#c8e6ff;"></div>
+					</div>
+
+					<!-- в живой проценке лишние строки группы получают psp1-m-offer--hidden; здесь вторая строка видна для примера сетки -->
+					<div class="psp1-m-offer psp1-m-offer--fold-0">
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brand">BOSCH</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--sku"><a class="psp1-m-link" href="#">0 986 424 674</a></div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--title">Тот же артикул, другой склад</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--stock">2</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--eta">1 дн.</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--info"><span class="psp1-m-info"><i class="fa fa-camera" style="font-size:.8em"></i></span></div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--price">3 890 ₽</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--cart">…</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brandline" style="background:#b8d8f8;"></div>
+					</div>
+
+					<div class="psp1-m-pager">
+						<a class="psp1-m-btn psp1-m-btn--load" href="#">
+							<i class="fa fa-arrow-down" aria-hidden="true"></i> Показать еще
+						</a>
+					</div>
+
+					<div class="psp1-m-section">
+						<h3 class="psp1-m-section__title">Аналоги с быстрой доставкой</h3>
+					</div>
+
+					<div class="psp1-m-offer">
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brand">TRW</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--sku"><a class="psp1-m-link" href="#">GDB1763</a></div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--title">Колодки тормозные дисковые</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--stock">12</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--eta">
+							<span style="background:#fff700;padding:2px 6px;border-radius:4px;">Сегодня до 18:00</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--info">
+							<span class="psp1-m-info">
+								<span class="psp1-m-return psp1-m-return--ok"><span class="psp1-m-return__tip"></span> возврат</span>
+							</span>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--price">2 990 ₽</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--cart">
+							<a href="#"><i class="fa fa-shopping-cart"></i></a>
+						</div>
+						<div class="psp1-m-offer__cell psp1-m-offer__cell--brandline" style="background:#ffe0b0;"></div>
+					</div>
+
+					<div class="psp1-m-pager">
+						<a class="psp1-m-btn psp1-m-btn--load" href="#" style="display:inline-flex;">Показать еще</a>
+					</div>
+				</div>
+			</div>
+
+			<hr style="margin:2rem 0;border:none;border-top:1px dashed #ccc;" />
+
+			<p style="font:13px Inter,sans-serif;color:#666;">Пример пустой выдачи после фильтра:</p>
+			<div class="psp1-m-empty">Товары не найдены</div>
+		</div>
+	</div>
+</body>
+</html>

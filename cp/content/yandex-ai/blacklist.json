@@ -1,0 +1,58 @@
+{
+    "market.yandex.ru": {
+        "domain": "market.yandex.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/market.yandex.ru\/search?text=%D0%92%D0%BE%D0%B4%D1%8F%D0%BD%D0%BE%D0%B9%20%D0%BD%D0%B0%D1%81%D0%BE%D1%81%2C%20DOLZ%2C%20C110"
+        },
+        "added_at": "2026-04-09 17:27:36"
+    },
+    "hyperauto.ru": {
+        "domain": "hyperauto.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/hyperauto.ru\/product\/vodyanoy-nasos-pompa-sistemy-ohlazhdeniya-dolz-art-c-110-300844906\/"
+        },
+        "added_at": "2026-04-09 17:27:36"
+    },
+    "planetavto.ru": {
+        "domain": "planetavto.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/planetavto.ru\/pompy\/dolz-c110"
+        },
+        "added_at": "2026-04-09 17:31:29"
+    },
+    "wildberries.ru": {
+        "domain": "wildberries.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/www.wildberries.ru\/catalog\/124581205\/detail.aspx"
+        },
+        "added_at": "2026-04-09 17:31:29"
+    },
+    "m.avito.ru": {
+        "domain": "m.avito.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/m.avito.ru\/novosibirsk\/zapchasti_i_aksessuary\/porog_levyy_ford_explorer_5_u502_7278295394"
+        },
+        "added_at": "2026-04-09 17:34:01"
+    },
+    "avito.ru": {
+        "domain": "avito.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/www.avito.ru\/reutov\/zapchasti_i_aksessuary\/nakladka_poroga_pravogo_ford_explorer_5_4320083849"
+        },
+        "added_at": "2026-04-09 17:34:01"
+    },
+    "ozon.ru": {
+        "domain": "avito.ru",
+        "reason": "captcha",
+        "details": {
+            "url": "https:\/\/www.avito.ru\/reutov\/zapchasti_i_aksessuary\/nakladka_poroga_pravogo_ford_explorer_5_4320083849"
+        },
+        "added_at": "2026-04-09 17:34:01"
+    }
+}

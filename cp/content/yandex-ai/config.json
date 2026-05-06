@@ -1,0 +1,59 @@
+{
+    "/* ОБЩИЕ НАСТРОЙКИ YANDEX CLOUD */": "",
+    "folder_id": "b1g7up9embekihd8a5vu",
+    "api_key": "AQVN3T3quPXc1z3JwSvygdc_OnIkdacr3WIBwgkd",
+    
+    "/* НАСТРОЙКИ ПОИСКОВОГО МОДУЛЯ */": "",
+    "search": {
+        "max_results": 10,
+        "max_pages": 3,
+        "region": "225",
+        "timeout": 15,
+        "use_cache": true,
+        "cache_ttl": 3600,
+        "fix_typo": true,
+        "family_mode": "FAMILY_MODE_MODERATE"
+    },
+    
+    "/* НАСТРОЙКИ МОДУЛЯ ПАРСЕРА */": "",
+    "parser": {
+        "max_urls_per_request": 5,
+        "timeout": 10,
+        "max_redirects": 3,
+        "use_cache": true,
+        "cache_ttl": 86400,
+        "min_content_length": 100,
+        "max_content_length": 150000,
+        "clean_html": true,
+        "remove_scripts": true,
+        "remove_styles": true,
+        "remove_navigation": true,
+        "extract_title": true,
+        "extract_description": true,
+        "extract_keywords": true,
+        "delay_between_requests": 300000
+    },
+    
+    "/* НАСТРОЙКИ ЧЕРНОГО СПИСКА */": "",
+    "blacklist": {
+        "enabled": true,
+        "auto_add": true,
+        "max_attempts": 3
+    },
+    
+    "/* НАСТРОЙКИ КЭША */": "",
+    "cache": {
+        "enabled": true,
+        "search_ttl": 3600,
+        "page_ttl": 86400,
+        "max_size_mb": 100
+    },
+    
+    "/* НАСТРОЙКИ ЛОГИРОВАНИЯ */": "",
+    "logging": {
+        "max_lines": 1000,
+        "log_errors": true,
+        "log_info": true,
+        "log_debug": false
+    }
+}

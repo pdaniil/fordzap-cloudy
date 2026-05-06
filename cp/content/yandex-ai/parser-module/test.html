@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Fordzap Parser — умный тест-драйв</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #0b0b14 0%, #14141f 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: #eef2ff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { margin-bottom: 32px; }
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #a5b4fc, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            color: #8b8ca8;
+            margin-top: 8px;
+            border-left: 3px solid #6366f1;
+            padding-left: 16px;
+            font-size: 0.95rem;
+        }
+        .card {
+            background: rgba(20, 20, 35, 0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            padding: 28px;
+            margin-bottom: 28px;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease, border-color 0.2s;
+        }
+        .card:hover { border-color: rgba(99, 102, 241, 0.5); transform: translateY(-2px); }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #cbd5e6;
+            font-size: 0.9rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: #0f0f1a;
+            border: 1px solid #2d2d44;
+            border-radius: 20px;
+            color: #f0f3ff;
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+        }
+        .options-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin: 20px 0 20px;
+            align-items: center;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #0a0a12;
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1px solid #2a2a3a;
+        }
+        button {
+            background: #6366f1;
+            border: none;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+        }
+        button:hover { background: #4f52e0; transform: scale(0.98); }
+        button.secondary { background: #2d2d44; box-shadow: none; }
+        button.secondary:hover { background: #3d3d5a; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #2d2d44;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error {
+            background: rgba(220, 38, 38, 0.15);
+            border-left: 4px solid #ef4444;
+            padding: 16px 24px;
+            border-radius: 20px;
+            margin-bottom: 24px;
+            display: none;
+            backdrop-filter: blur(8px);
+        }
+        .result-container { display: none; }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            gap: 12px;
+        }
+        .result-header h2 { font-size: 1.6rem; font-weight: 600; }
+        .stats-badge {
+            background: #0f0f1a;
+            border-radius: 40px;
+            padding: 8px 18px;
+            font-size: 0.85rem;
+            font-family: monospace;
+        }
+        .structured-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+        .info-card {
+            background: #0c0c16;
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid #26263a;
+        }
+        .info-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: #a5b4fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dimensions-table, .attrs-table {
+            width: 100%;
+            font-size: 0.85rem;
+            border-collapse: collapse;
+        }
+        .dimensions-table td, .attrs-table td {
+            padding: 8px 0;
+            border-bottom: 1px solid #1e1e2e;
+        }
+        .dimensions-table td:first-child, .attrs-table td:first-child {
+            font-weight: 600;
+            color: #9ca3af;
+            width: 40%;
+        }
+        .applicability-list { list-style: none; margin-top: 8px; }
+        .applicability-list li {
+            background: #0a0a10;
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            word-break: break-word;
+        }
+        .matched-badge {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+        .selling-block {
+            background: linear-gradient(135deg, #1e1b4b, #0f172a);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 28px;
+            border: 1px solid #6366f1;
+        }
+        .selling-text {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin: 12px 0;
+            color: #e2e8f0;
+        }
+        .urls-status {
+            background: #0c0c16;
+            border-radius: 24px;
+            padding: 16px;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #1f1f2e;
+            font-size: 0.85rem;
+        }
+        .status-icon { width: 28px; text-align: center; }
+        .status-success { color: #4ade80; }
+        .status-error { color: #f87171; }
+        .status-captcha { color: #fbbf24; }
+        .url-text { word-break: break-all; flex: 1; font-family: monospace; }
+        .copy-btn {
+            background: #2d2d44;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        hr { border-color: #26263a; margin: 20px 0; }
+        @media (max-width: 700px) {
+            .card { padding: 20px; }
+            .structured-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚡ Fordzap Parser</h1>
+        <div class="sub">умный парсинг + DeepSeek AI · новая структура данных · чёрные списки</div>
+    </div>
+
+    <div class="card">
+        <div class="form-group">
+            <label>🔗 Одиночный URL</label>
+            <input type="text" id="singleUrl" value="https://planetavto.ru/pompy/dolz-c110">
+            <button onclick="parseSingle()" style="margin-top: 12px;">🚀 Парсить</button>
+        </div>
+
+        <div class="form-group">
+            <label>📚 Несколько URL (по одному на строку)</label>
+            <textarea id="multiUrls" rows="4">https://planetavto.ru/pompy/dolz-c110
+https://autopiter.ru/goods/c110/dolz/id915787</textarea>
+            <button onclick="parseMultiple()" style="margin-top: 12px;">⚡ Парсить пакет</button>
+        </div>
+
+        <div class="options-panel">
+            <div class="option-item">
+                <input type="checkbox" id="useCache" checked> <label>🗄 Кэш</label>
+            </div>
+            <div class="option-item">
+                <input type="checkbox" id="noCache"> <label>🚫 Принудительно без кэша</label>
+            </div>
+            <div class="option-item">
+                <label>⏱ Задержка (мс)</label>
+                <input type="number" id="waitFor" value="1000" style="width: 85px;">
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="secondary" onclick="getStats()">📊 Статистика</button>
+            <button class="secondary" onclick="clearCache()">🗑️ Очистить кэш</button>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Анализируем страницы, вызываем DeepSeek...</div>
+    </div>
+    <div class="error" id="error"></div>
+
+    <div class="result-container" id="resultContainer">
+        <div class="card">
+            <div class="result-header">
+                <h2>📦 Результат обработки</h2>
+                <button class="copy-btn" onclick="copyFullJson()">📋 Копировать JSON</button>
+            </div>
+            <div class="stats-badge" id="statsSummary"></div>
+            <hr>
+
+            <div id="sellingBlock" class="selling-block" style="display: none;">
+                <h3>✨ Продающее описание</h3>
+                <div id="sellingText" class="selling-text"></div>
+            </div>
+
+            <div id="structuredContainer"></div>
+
+            <div id="urlsStatusBlock" class="urls-status" style="margin-top: 20px;">
+                <h3>🌐 Детали по каждому URL</h3>
+                <div id="urlsStatusList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let lastFullResponse = null;
+
+    function showLoading() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('resultContainer').style.display = 'none';
+    }
+    function hideLoading() {
+        document.getElementById('loading').style.display = 'none';
+    }
+    function showError(msg) {
+        const errDiv = document.getElementById('error');
+        errDiv.textContent = '❌ ' + msg;
+        errDiv.style.display = 'block';
+        hideLoading();
+    }
+
+    async function parseSingle() {
+        const url = document.getElementById('singleUrl').value.trim();
+        if (!url) return alert('Введите URL');
+        const useCache = document.getElementById('useCache').checked;
+        const noCache = document.getElementById('noCache').checked;
+        const waitFor = parseInt(document.getElementById('waitFor').value) || 1000;
+
+        const payload = {
+            action: 'parse',
+            url: url,
+            use_cache: useCache,
+            no_cache: noCache,
+            wait_for: waitFor
+        };
+        await sendRequest(payload);
+    }
+
+    async function parseMultiple() {
+        const urlsText = document.getElementById('multiUrls').value;
+        const urls = urlsText.split('\n').map(u => u.trim()).filter(u => u !== '');
+        if (urls.length === 0) return alert('Введите хотя бы один URL');
+        const useCache = document.getElementById('useCache').checked;
+        const noCache = document.getElementById('noCache').checked;
+        const waitFor = parseInt(document.getElementById('waitFor').value) || 1000;
+
+        const payload = {
+            action: 'parse_multiple',
+            urls: urls,
+            use_cache: useCache,
+            no_cache: noCache,
+            wait_for: waitFor
+        };
+        await sendRequest(payload);
+    }
+
+    async function sendRequest(payload) {
+        showLoading();
+        try {
+            const response = await fetch('parser_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            lastFullResponse = data;
+            if (data.success) {
+                displayResult(data);
+            } else {
+                showError(data.error || 'Ошибка API');
+            }
+        } catch (e) {
+            showError('Сетевая ошибка: ' + e.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function displayResult(data) {
+        let overall = null;
+        let selling = '';
+        let urlsStatus = [];
+
+        if (data.overall_structured) {
+            overall = data.overall_structured;
+            selling = data.selling_description || '';
+            urlsStatus = data.urls_status || [];
+        } else if (data.results) {
+            for (let key in data.results) {
+                let item = data.results[key];
+                if (item.overall_structured) {
+                    overall = item.overall_structured;
+                    selling = item.selling_description || '';
+                    urlsStatus = item.urls_status || [];
+                    break;
+                }
+            }
+        } else if (data.overall_structured === undefined && data.api_result) {
+            overall = data.api_result.overall_structured || {};
+            selling = data.api_result.selling_description || '';
+            urlsStatus = data.api_result.urls_status || [];
+        }
+
+        if (!overall && data.api_result && !data.api_result.overall_structured) {
+            overall = {
+                description: data.description || data.api_result?.structured?.description || '—',
+                dimensions: data.api_result?.structured?.dimensions || {},
+                applicability: data.api_result?.structured?.applicability || [],
+                additional_attributes: data.api_result?.structured?.additional_attributes || {},
+                matched_vehicles: data.api_result?.structured?.matched_vehicles || []
+            };
+            selling = data.api_result?.selling_description || '';
+            urlsStatus = data.api_result?.urls_status || [];
+        }
+
+        const stats = data.stats || {};
+        document.getElementById('statsSummary').innerHTML = `
+            🧾 Всего запросов: ${stats.requests || 0} &nbsp;|&nbsp;
+            ✅ Успешно: ${stats.success || 0} &nbsp;|&nbsp;
+            ❌ Ошибок: ${stats.failed || 0} &nbsp;|&nbsp;
+            💾 Из кэша: ${stats.cached || 0} &nbsp;|&nbsp;
+            🚫 Чёрный список: ${stats.blacklisted || 0} &nbsp;|&nbsp;
+            🤖 Капча: ${stats.captcha || 0}
+        `;
+
+        const sellingDiv = document.getElementById('sellingBlock');
+        const sellingTextDiv = document.getElementById('sellingText');
+        if (selling && selling.trim()) {
+            sellingDiv.style.display = 'block';
+            sellingTextDiv.innerText = selling;
+        } else {
+            sellingDiv.style.display = 'none';
+        }
+
+        document.getElementById('structuredContainer').innerHTML = renderStructured(overall);
+        document.getElementById('urlsStatusList').innerHTML = renderUrlsStatus(urlsStatus, data);
+        document.getElementById('resultContainer').style.display = 'block';
+        window.scrollTo({ top: document.getElementById('resultContainer').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function renderStructured(struct) {
+        if (!struct) return '<div class="info-card">Нет структурированных данных</div>';
+        const dims = struct.dimensions || {};
+        const attrs = struct.additional_attributes || {};
+        const applicability = struct.applicability || [];
+        const matched = struct.matched_vehicles || [];
+
+        let dimsHtml = '<div class="info-card"><h3>📏 Габариты и вес</h3><table class="dimensions-table">';
+        const dimFields = ['length', 'width', 'height', 'weight'];
+        let hasDims = false;
+        for (let f of dimFields) {
+            if (dims[f]) {
+                hasDims = true;
+                dimsHtml += `<tr><td>${f === 'length' ? 'Длина' : f === 'width' ? 'Ширина' : f === 'height' ? 'Высота' : 'Вес'}</td><td>${escapeHtml(dims[f])}</td></tr>`;
+            }
+        }
+        if (!hasDims) dimsHtml += '<tr><td colspan="2">— не указаны —</td></tr>';
+        dimsHtml += '</table></div>';
+
+        let attrsHtml = '<div class="info-card"><h3>🔧 Дополнительные характеристики</h3><table class="attrs-table">';
+        if (Object.keys(attrs).length === 0) {
+            attrsHtml += '<tr><td colspan="2">— нет данных —</td></tr>';
+        } else {
+            for (let [k, v] of Object.entries(attrs)) {
+                attrsHtml += `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(String(v))}</td></tr>`;
+            }
+        }
+        attrsHtml += '</table></div>';
+
+        let applicabilityHtml = '<div class="info-card"><h3>🚗 Применимость (совместимость)</h3>';
+        if (applicability.length === 0) {
+            applicabilityHtml += '<div>— не найдена —</div>';
+        } else {
+            let list = '<ul class="applicability-list">';
+            for (let app of applicability) {
+                let matchedInfo = '';
+                let matchedItem = matched.find(m => m.original === app);
+                if (matchedItem && matchedItem.matched_id) {
+                    matchedInfo = ` <span class="matched-badge">✅ матч id: ${matchedItem.matched_id}</span>`;
+                } else if (matchedItem && matchedItem.matched_id === null) {
+                    matchedInfo = ` <span class="matched-badge">❌ не найдено</span>`;
+                }
+                list += `<li>${escapeHtml(app)}${matchedInfo}</li>`;
+            }
+            list += '</ul>';
+            applicabilityHtml += list;
+        }
+        applicabilityHtml += '</div>';
+
+        let descHtml = `<div class="info-card"><h3>📝 Описание товара</h3><div style="line-height:1.5;">${escapeHtml(struct.description || '—')}</div></div>`;
+        return `<div class="structured-grid">${descHtml}${dimsHtml}${attrsHtml}${applicabilityHtml}</div>`;
+    }
+
+    function renderUrlsStatus(statuses, fullData) {
+        if (!statuses || statuses.length === 0) {
+            if (fullData.url) {
+                let hasError = fullData.error ? true : false;
+                let statusClass = hasError ? 'status-error' : 'status-success';
+                let icon = hasError ? '❌' : '✅';
+                let errorText = fullData.error ? escapeHtml(fullData.error) : '';
+                return `<div class="status-item"><span class="status-icon">${icon}</span><span class="url-text">${escapeHtml(fullData.url)}</span><span class="${statusClass}">${errorText || 'Успешно'}</span></div>`;
+            }
+            return '<div>Нет детальной информации по URL</div>';
+        }
+        let html = '';
+        for (let st of statuses) {
+            let icon = '✅';
+            let statusText = 'Успешно';
+            let statusClass = 'status-success';
+            if (st.parse_status === 'captcha') {
+                icon = '🤖';
+                statusText = 'Капча';
+                statusClass = 'status-captcha';
+            } else if (st.parse_status !== 'success' && st.error) {
+                icon = '❌';
+                statusText = escapeHtml(st.error);
+                statusClass = 'status-error';
+            } else if (st.error) {
+                icon = '❌';
+                statusText = escapeHtml(st.error);
+                statusClass = 'status-error';
+            }
+            html += `<div class="status-item">
+                        <span class="status-icon">${icon}</span>
+                        <span class="url-text">${escapeHtml(st.url || '—')}</span>
+                        <span class="${statusClass}">${statusText}</span>
+                     </div>`;
+        }
+        return html;
+    }
+
+    async function getStats() {
+        showLoading();
+        try {
+            const resp = await fetch('parser_api.php?action=stats');
+            const data = await resp.json();
+            if (data.success) {
+                alert(JSON.stringify(data.stats, null, 2));
+            } else {
+                alert('Ошибка получения статистики');
+            }
+        } catch(e) { alert('Ошибка: '+e.message); }
+        finally { hideLoading(); }
+    }
+
+    async function clearCache() {
+        if (!confirm('Очистить кэш страниц?')) return;
+        try {
+            const resp = await fetch('parser_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'clear_cache' })
+            });
+            const data = await resp.json();
+            alert(data.message || 'Кэш очищен');
+        } catch(e) { alert('Ошибка: '+e.message); }
+    }
+
+    function copyFullJson() {
+        if (lastFullResponse) {
+            const text = JSON.stringify(lastFullResponse, null, 2);
+            navigator.clipboard.writeText(text).then(() => alert('JSON скопирован')).catch(() => alert('Не удалось скопировать'));
+        } else {
+            alert('Нет данных');
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+</script>
+</body>
+</html>

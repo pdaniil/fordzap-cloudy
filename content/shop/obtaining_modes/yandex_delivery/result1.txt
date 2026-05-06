@@ -1,0 +1,30 @@
+true
+
+
+
+Resource id #4
+
+Resource id #4
+
+
+
+{"code":"estimating.tariff.not_present_in_tariff_line_strategy","message":"Данного тарифа нет в стратегиях для тарифной линейки доставки"}
+
+{"code":"estimating.tariff.not_available_in_zone","message":"Тариф не доступен в данной зоне доставки"}
+
+{"price":"337.2","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":5881.606934,"eta":17.983333333333334,"zone_id":"novomoskovsk"}
+
+{"price":"872.4","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":15150.520508,"eta":25.916666666666668,"zone_id":"novomoskovsk"}
+
+{"price":"872.4","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":15150.520508,"eta":26.0,"zone_id":"novomoskovsk"}
+
+{"price":"842.4","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":15150.520508,"eta":25.983333333333334,"zone_id":"novomoskovsk"}
+
+{"price":"842.4","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":15150.520508,"eta":26.033333333333335,"zone_id":"novomoskovsk"}
+
+{"price":"842.4","currency_rules":{"code":"RUB","text":"RUB","template":"RUB","sign":"RUB"},"requirements":{"taxi_class":"express"},"distance_meters":15150.520508,"eta":26.016666666666666,"zone_id":"novomoskovsk"}
+
+
+
+
+

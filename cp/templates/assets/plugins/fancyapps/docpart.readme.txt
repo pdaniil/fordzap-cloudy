@@ -1,0 +1,8 @@
+https://fancyapps.com/fancybox/getting-started/
+Используется для модальный окон, просмотра изображений, видео и iframe
+
+This built-in plugin adds support for inline content, videos (HTML5, Youtube and Vimeo), iframes, Google maps, and Ajax content. Supported websites can be used with Fancybox by simply specifying the URL of the page.
+
+CDN
+https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js
+https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css

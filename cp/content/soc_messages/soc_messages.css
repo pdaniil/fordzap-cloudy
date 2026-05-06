@@ -1,0 +1,395 @@
+.soc-messages-container{
+    display: flex;
+    height: 70vh;
+    background: white;
+    border-radius: 2px;
+    border: 1px solid #e4e5e7;
+    @media (max-width: 767px){
+        flex-direction: column;
+        height: 50vh;
+    }
+}
+.soc-messages-chats-wrapper{
+    display: flex;
+    flex-direction: column;
+}
+.soc-messages-chats-search input{
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #e4e5e7;
+    outline: none;
+    padding: 10px 15px;
+    color: black;
+}
+.soc-messages-chats{
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 350px;
+    @media (max-width: 767px){
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: row;
+    }
+}
+.soc-message-empty{
+    padding: 0px 30px;
+}
+.soc-chat{
+    display: flex;
+    gap: 10px;
+    padding: 5px;
+    border-bottom: 1px solid #e4e5e7;
+}
+.soc-chat.active{
+    background: rgba(68, 123, 186, 0.1);
+}
+.soc-chat:hover{
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.05);
+}
+.soc-chat-photo{
+    width: 64px;
+    height: 64px;
+    position: relative;
+}
+.soc-chat-social{
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    position: absolute;
+    left: -4px;
+    top: -4px;
+    overflow: hidden;
+    border: 1px solid gray;
+}
+.soc-chat-social img{
+    width: 100%;
+    height: 100%;
+}
+.soc-messages-chat-info{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+    border-bottom: 1px solid #e4e5e7;
+    position: relative;
+}
+.soc-chat-item-block .item-content{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 30px;
+    font-size: 16px;
+}
+.soc-chat-item-block .item a:hover{
+    color: red;
+}
+.soc-chat-item-block .item img{
+    max-width: 100px;
+    max-height: 100px;
+    border: 2px solid #f1f3f6;
+}
+.soc-chat-unseen{
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: #ff3347;
+    border-radius: 13px;
+    display: flex;
+    min-width: 18px;
+    padding: 2px 3px;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}
+.soc-chat-photo-img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 32px;
+    border: 1px solid #e4e5e7;
+    background:#e4e5e7;
+    overflow: hidden;
+}
+.soc-chat-photo-img, .soc-chat-photo-img img{
+    width: 64px;
+    height: 64px;
+}
+.soc-chat-info{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    overflow: hidden;
+    @media (max-width: 767px){
+        display: none!important;    
+    }
+}
+.soc-chat-name{
+    font-size: 18px;
+}
+.soc-chat-name:hover{
+    color: #67a6ff!important;
+}
+.soc-chat-last-message{
+    font-size: 16px;
+}
+.soc-chat-name, .soc-chat-last-message{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-height: 25px;
+}
+.soc-messages-messages{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #e4e5e7;
+}
+.d-none{
+    display: none!important;
+}
+.need-select-dialog{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+.soc-messages-list{
+    overflow: hidden;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0px;
+}
+.soc-messages-send{
+    border-top: 1px solid #e4e5e7;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+.soc-messages-send-input{
+    width: 100%;
+    position: relative;
+}
+#message-add-attachment-btn{
+    font-size: 20px;
+    right: 10px;
+    top: 10px;
+    position: absolute;
+    cursor: pointer;
+}
+#message-add-attachment-btn:hover{
+    color: rgba(68, 123, 186,1);
+}
+#message-add-attachments-list{
+    position: absolute;
+    bottom: 100%;
+    display: flex;
+    justify-content: left;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+.message-add-attachment{
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+    padding: 5px 20px 5px 5px;
+    border-radius: 5px;
+    border: 1px solid #e4e5e7;
+    min-width: 120px;
+    max-width: 250px;
+    box-shadow: 0 0 5px 0 rgba(0,0,0,0.2);
+    background: #f1f3f6;
+}
+.message-add-attachment-name.active:hover{
+    cursor: pointer;
+    color: #67a6ff!important;
+}
+.message-add-attachment-name, .message-add-attachment-size{
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.message-add-attachment-remove{
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    font-size: 20px;
+}
+.message-add-attachment-remove:hover{
+    cursor: pointer;
+    color: #dc3545;
+}
+#soc-messages-message-text{
+    height: 5px;
+    width: 100%;
+    padding: 10px 20px;
+    border-radius: 5px;
+    min-height: 50px;
+    max-height: 200px;
+    resize: vertical;
+    overflow: hidden;
+    border: 1px solid #e4e5e7;
+    outline: none;
+}
+.soc-messages-send-control, #message-send-btn{
+    width: 130px;
+}
+.soc-spinning{
+    animation: soc-spin 1s infinite linear;
+    -webkit-animation: soc-spin-wk 1s infinite linear;
+}
+.soc-chat-loader, .soc-message-loader{
+    display: flex;
+    justify-content: center;
+    padding: 15px 0px;
+}
+.soc-chat-loader{
+    @media (max-width: 767px){
+        height: 75px;
+        padding-top: 30px;
+        display: block;
+    }
+}
+.soc-chat-empty{
+    display: flex;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+.soc-message{
+    padding: 0px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+.soc-message-content{
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.05);
+    color: #6a6c6f;
+    border-radius: 5px;
+    order: 1;
+    font-size: 16px;
+    max-width: 1000px;
+    word-wrap: break-word;
+}
+.soc-message-date{
+    order: 2;
+    display: flex;
+    align-items: end;
+    font-size: 14px;
+}
+.soc-message-attachments{
+    display: flex;
+    flex-direction: column;
+}
+.soc-attachment-document{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.soc-attachment-document-ext{
+    background: rgba(0, 0, 0, 0.4);
+    font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.soc-message-attachment{
+    margin-top: 15px;
+}
+.soc-message-attachment:first-child{
+    margin-top: 0px;
+}
+.soc-message-attachment:hover .soc-attachment-document-ext{
+    color: red;
+}
+.soc-message-attachment a{
+    color: black;
+    text-decoration: none;
+}
+.soc-message-attachment audio, .soc-message-attachment video.audio{
+    width: 400px!important;
+    height: 50px!important;
+}
+.soc-message-attachment a:hover .soc-attachment-link{
+    color: red!important;
+}
+.soc-message-attachment iframe, .soc-message-attachment .soc-attachment-photo, .soc-attachment-market-photo, .soc-attachment-story-photo{
+    border: none!important;
+    border-radius: 5px!important;
+    background: rgba(0, 0, 0, 0.4);
+    width: 400px;
+    max-height: 300px;
+    object-fit: cover;
+}
+.soc-attachment-photo img, .soc-attachment-market-photo img, .soc-attachment-story-photo img{
+    width: 100%;
+    max-width: 400px;
+    max-height: 300px;
+    object-fit: contain;
+}
+.soc-message.self{
+    justify-content: right;
+}
+.soc-attachment-type-audio{
+    height: 50px!important;
+}
+.soc-message.self .soc-message-content{
+    order: 3;
+    background: rgba(0, 0, 0, 0.05);
+    color: #6a6c6f;
+}
+.soc-message:last-child{
+    margin-bottom: 0px;
+}
+.soc-message-forward-messages{
+    .soc-message{
+        border-left: 2px solid black;
+        padding-left: 5px;
+    }
+}
+.soc-message-sticker, .soc-message-sticker-animation{
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+.soc-message-sticker img, .soc-message-sticker-animation svg{
+    width: 100px;
+    height: 100px;
+}
+@keyframes soc-spin{
+    from{
+        transform: scale(1) rotate(0deg);
+    }
+    to{
+        transform: scale(1) rotate(360deg);
+    }
+}
+
+@-webkit-keyframes soc-spin-wk{
+    from{
+        -webkit-transform: rotate(0deg);
+    }
+    to{
+        -webkit-transform: rotate(360deg);
+    }
+}

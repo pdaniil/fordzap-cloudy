@@ -1,0 +1,11 @@
+01.02.2025 09:27:20
+REQUEST_METHOD: POST
+$_GET: []
+$_POST: {"TerminalKey":"1736499616296","OrderId":"7745","Success":"true","Status":"CONFIRMED","PaymentId":"5782327772","ErrorCode":"0","Amount":"1000","RebillId":"","SpAccumulationId":"","Pan":"+7(910)***-**-50","Token":"f39b54094ba11e65e631ac16e3450453c36467a3f06f1b4b66fd7e424ab99472"}
+$data: "TerminalKey=1736499616296&OrderId=7745&Success=true&Status=CONFIRMED&PaymentId=5782327772&ErrorCode=0&Amount=1000&RebillId=&SpAccumulationId=&Pan=%2B7%28910%29***-**-50&Token=f39b54094ba11e65e631ac16e3450453c36467a3f06f1b4b66fd7e424ab99472"
+
+
+
+--------------------------------------
+
+

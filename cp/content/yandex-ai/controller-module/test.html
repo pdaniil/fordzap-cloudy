@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Controller</title>
+</head>
+<body>
+    <h1>Search Controller</h1>
+    
+    <input type="text" id="query" value="Ossca 19210">
+    <button onclick="searchAndParse()">Поиск</button>
+    
+    <div id="loading" style="display:none;">Загрузка...</div>
+    <div id="error" style="color:red;"></div>
+    
+    <div id="result" style="display:none;">
+        <h3>Результаты:</h3>
+        <div id="stats"></div>
+        <div id="results"></div>
+        
+        <h4>Результат для генератора:</h4>
+        <textarea id="generatorOutput" style="width:100%; height:300px;" readonly></textarea>
+        <button onclick="copyText()">Копировать</button>
+    </div>
+    
+    <script>
+    async function searchAndParse() {
+        const query = document.getElementById('query').value;
+        
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error').style.display = 'none';
+        document.getElementById('result').style.display = 'none';
+        
+        try {
+            const response = await fetch('controller_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'search_and_parse',
+                    q: query,
+                    max_results: 10,
+					max_parse : 10,
+					search_options : {max_results : 10},
+                    skip_blacklisted: true
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('stats').innerHTML = `
+                    Найдено: ${data.search?.results_count || 0}<br>
+                    Спарсено: ${data.parse?.success || 0}/${data.parse?.requested || 0}
+                `;
+                
+                let resultsHtml = '';
+                data.results.forEach((item, i) => {
+                    resultsHtml += `<div>${i+1}. <a href="${item.url}" target="_blank">${item.title}</a></div>`;
+                });
+                document.getElementById('results').innerHTML = resultsHtml;
+                
+                // Получаем форматированный текст
+                const textResponse = await fetch('controller_api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'format',
+                        data: data,
+                        format: 'plain'
+                    })
+                });
+                
+                const plainText = await textResponse.text();
+                document.getElementById('generatorOutput').value = plainText;
+                document.getElementById('result').style.display = 'block';
+                
+            } else {
+                document.getElementById('error').innerHTML = 'Ошибка: ' + data.error;
+                document.getElementById('error').style.display = 'block';
+            }
+        } catch (error) {
+            document.getElementById('error').innerHTML = 'Ошибка сети: ' + error.message;
+            document.getElementById('error').style.display = 'block';
+        } finally {
+            document.getElementById('loading').style.display = 'none';
+        }
+    }
+    
+    function copyText() {
+        const textarea = document.getElementById('generatorOutput');
+        textarea.select();
+        navigator.clipboard.writeText(textarea.value)
+            .then(() => alert('Скопировано!'))
+            .catch(() => alert('Ошибка копирования'));
+    }
+    </script>
+</body>
+</html>

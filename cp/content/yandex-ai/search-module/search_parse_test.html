@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск + Парсинг (единый API)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Roboto, system-ui;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-top: 0;
+            color: #1e3a8a;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .result-section {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .result-title {
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .url-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .selling-text {
+            background: #dbeafe;
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .structured-card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        .badge {
+            background: #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-size: 12px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 Поиск Яндекс + Парсинг (единый API)</h1>
+
+    <div class="card">
+        <div class="flex-row">
+            <div class="form-group" style="flex:3">
+                <label>Поисковый запрос (q)</label>
+                <input type="text" id="query" value="водяной насос Dolz C110" placeholder="например: водяной насос Dolz C110">
+            </div>
+            <div class="form-group">
+                <label>Max результатов</label>
+                <input type="number" id="max_results" value="8" min="1" max="30">
+            </div>
+            <div class="form-group">
+                <button id="searchBtn">🔎 Найти и распарсить</button>
+            </div>
+        </div>
+
+        <div class="options-grid">
+            <div>
+                <label>📄 Страниц поиска (max_pages)</label>
+                <input type="number" id="max_pages" value="2" min="1" max="5">
+            </div>
+            <div>
+                <label>⚙️ Параллелизм парсинга</label>
+                <input type="number" id="parse_parallel" value="3" min="1" max="10">
+            </div>
+            <div>
+                <label>⏱ Задержка (ms)</label>
+                <input type="number" id="parse_wait_for" value="3000" step="500">
+            </div>
+            <div>
+                <label>📦 Кэш поиска</label>
+                <select id="search_use_cache">
+                    <option value="1">Включён</option>
+                    <option value="0">Выключен</option>
+                </select>
+            </div>
+            <div>
+                <label>💾 Кэш парсинга</label>
+                <select id="parse_no_cache">
+                    <option value="0">Включён</option>
+                    <option value="1">Выключен (свежий)</option>
+                </select>
+            </div>
+            <div>
+                <label>🌍 Регион</label>
+                <input type="text" id="region" value="225" placeholder="225 — Москва">
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Ищем и парсим страницы... (может занять до минуты)</div>
+    </div>
+    <div id="error" class="error" style="display:none"></div>
+    <div id="resultContainer" style="display:none;"></div>
+</div>
+
+<script>
+    const searchBtn = document.getElementById('searchBtn');
+    const loadingDiv = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+    const resultContainer = document.getElementById('resultContainer');
+
+    searchBtn.addEventListener('click', async () => {
+        const query = document.getElementById('query').value.trim();
+        if (!query) {
+            showError('Введите поисковый запрос');
+            return;
+        }
+
+        const max_results = parseInt(document.getElementById('max_results').value);
+        const max_pages = parseInt(document.getElementById('max_pages').value);
+        const parse_parallel = parseInt(document.getElementById('parse_parallel').value);
+        const parse_wait_for = parseInt(document.getElementById('parse_wait_for').value);
+        const search_use_cache = document.getElementById('search_use_cache').value === '1';
+        const parse_no_cache = document.getElementById('parse_no_cache').value === '1';
+        const region = document.getElementById('region').value;
+
+        const payload = {
+            q: query,
+            max_results: max_results,
+            max_pages: max_pages,
+            parse_parallel: parse_parallel,
+            parse_wait_for: parse_wait_for,
+            search_use_cache: search_use_cache,
+            parse_no_cache: parse_no_cache,
+            region: region,
+            sort: 'relevance'
+        };
+
+        showLoading();
+        hideError();
+        resultContainer.style.display = 'none';
+
+        try {
+            const response = await fetch('search_parse_api.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Ошибка API');
+            }
+            displayResults(data);
+        } catch (err) {
+            showError(err.message);
+        } finally {
+            hideLoading();
+        }
+    });
+
+    function displayResults(data) {
+        resultContainer.innerHTML = '';
+        // Блок поиска
+        const searchBlock = document.createElement('div');
+        searchBlock.className = 'result-section';
+        searchBlock.innerHTML = `
+            <div class="result-title">🔍 Результаты поиска (${data.search.results_count} из ${data.search.total_available})</div>
+            <div style="margin-bottom: 15px; font-size:0.85rem">⚠️ Пропущено из чёрного списка: ${data.search.filtered_skipped_blacklisted}</div>
+            <div style="max-height: 300px; overflow-y: auto; background:white; border-radius:16px;">
+                ${data.search.items.map(item => `
+                    <div class="url-item">
+                        <div><strong>${escapeHtml(item.title)}</strong></div>
+                        <div><a href="${escapeHtml(item.url)}" target="_blank" style="color:#2563eb; word-break:break-all">${escapeHtml(item.url)}</a></div>
+                        <div style="font-size:0.8rem; color:#475569">${escapeHtml(item.snippet)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Парсинг: продающее описание
+        let sellingHtml = '';
+        if (data.parse.selling_description) {
+            sellingHtml = `<div class="selling-text">✨ <strong>Продающее описание</strong><br>${escapeHtml(data.parse.selling_description)}</div>`;
+        }
+
+        // Структурированные данные
+        const structured = data.parse.overall_structured || {};
+        const dims = structured.dimensions || {};
+        const attrs = structured.additional_attributes || {};
+        const applicability = structured.applicability || [];
+        const matched = structured.matched_vehicles || [];
+
+        let dimsHtml = '<div class="structured-card"><h3>📏 Габариты</h3>';
+        if (Object.keys(dims).length) {
+            dimsHtml += `<ul>${Object.entries(dims).map(([k,v]) => `<li><strong>${k}</strong>: ${escapeHtml(v)}</li>`).join('')}</ul>`;
+        } else {
+            dimsHtml += '<div>— не указаны —</div>';
+        }
+        dimsHtml += '</div>';
+
+        let attrsHtml = '<div class="structured-card"><h3>🔧 Доп. характеристики</h3>';
+        if (Object.keys(attrs).length) {
+            attrsHtml += `<ul>${Object.entries(attrs).map(([k,v]) => `<li><strong>${escapeHtml(k)}</strong>: ${escapeHtml(String(v))}</li>`).join('')}</ul>`;
+        } else {
+            attrsHtml += '<div>— нет —</div>';
+        }
+        attrsHtml += '</div>';
+
+        let applicabilityHtml = '<div class="structured-card"><h3>🚗 Применимость</h3>';
+        if (applicability.length) {
+            let list = '<ul>';
+            for (let app of applicability) {
+                let matchedItem = matched.find(m => m.original === app);
+                let matchBadge = '';
+                if (matchedItem && matchedItem.matched_id) {
+                    matchBadge = ` <span class="badge">✅ id:${matchedItem.matched_id}</span>`;
+                } else if (matchedItem && matchedItem.matched_id === null) {
+                    matchBadge = ` <span class="badge">❌ не найдено</span>`;
+                }
+                list += `<li>${escapeHtml(app)}${matchBadge}</li>`;
+            }
+            list += '</ul>';
+            applicabilityHtml += list;
+        } else {
+            applicabilityHtml += '<div>— не найдена —</div>';
+        }
+        applicabilityHtml += '</div>';
+
+        let descriptionHtml = `<div class="structured-card"><h3>📝 Описание</h3><div>${escapeHtml(structured.description || '—')}</div></div>`;
+
+        const structuredGrid = `<div class="grid-2">${descriptionHtml}${dimsHtml}${attrsHtml}${applicabilityHtml}</div>`;
+
+        // Статусы парсинга по URL
+        let statusHtml = '<div class="result-section"><div class="result-title">🌐 Статусы парсинга</div><ul style="margin:0">';
+        (data.parse.urls_status || []).forEach(st => {
+            let icon = st.parse_status === 'success' ? '✅' : (st.parse_status === 'captcha' ? '🤖' : '❌');
+            statusHtml += `<li>${icon} <a href="${escapeHtml(st.url)}" target="_blank">${escapeHtml(st.url)}</a> — ${st.parse_status} ${st.error ? '('+escapeHtml(st.error)+')' : ''}</li>`;
+        });
+        statusHtml += '</ul></div>';
+
+        const parseBlock = document.createElement('div');
+        parseBlock.className = 'result-section';
+        parseBlock.innerHTML = `
+            <div class="result-title">📦 Данные парсинга</div>
+            ${sellingHtml}
+            ${structuredGrid}
+            ${statusHtml}
+            <details style="margin-top:16px">
+                <summary>📄 Полный JSON ответа</summary>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            </details>
+        `;
+
+        resultContainer.appendChild(searchBlock);
+        resultContainer.appendChild(parseBlock);
+        resultContainer.style.display = 'block';
+    }
+
+    function showLoading() {
+        loadingDiv.style.display = 'block';
+    }
+    function hideLoading() {
+        loadingDiv.style.display = 'none';
+    }
+    function showError(msg) {
+        errorDiv.textContent = '❌ ' + msg;
+        errorDiv.style.display = 'block';
+        resultContainer.style.display = 'none';
+    }
+    function hideError() {
+        errorDiv.style.display = 'none';
+    }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>

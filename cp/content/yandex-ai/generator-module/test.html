@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Интеграция: поиск → парсер → генератор</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; }
+        textarea, input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { padding: 8px 16px; background: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #1976D2; }
+        .step { border-left: 4px solid #2196F3; padding-left: 15px; margin: 15px 0; }
+        pre { background: #f5f5f5; padding: 10px; overflow: auto; white-space: pre-wrap; font-size: 12px; }
+        .error { color: red; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid #ccc; border-top-color: #2196F3; border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; vertical-align: middle; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 Интеграция: Поиск → Парсер → Генератор</h1>
+    
+    <div class="box">
+        <h2>Шаг 1: Поиск (Yandex Search API)</h2>
+        <input type="text" id="query" placeholder="Введите поисковый запрос, например: Ossca 19210" style="width: 70%;" value="Ossca 19210">
+        <button onclick="search()">🔍 Поиск</button>
+        <div class="loading" id="searchLoading"></div>
+        <div id="searchResults"></div>
+    </div>
+    
+    <div class="box" id="parserBox" style="display: none;">
+        <h2>Шаг 2: Парсинг (внешний API)</h2>
+        <div id="parseResults"></div>
+    </div>
+    
+    <div class="box" id="generatorBox" style="display: none;">
+        <h2>Шаг 3: Генерация (YandexGPT + БД применимости)</h2>
+        <div id="generatorOutput"></div>
+    </div>
+</div>
+
+<script>
+let lastSearchResults = null;
+let lastParsedText = null;
+
+async function search() {
+    const query = document.getElementById('query').value.trim();
+    if (!query) return alert('Введите запрос');
+    
+    // Очищаем предыдущие результаты
+    document.getElementById('searchResults').innerHTML = '';
+    document.getElementById('parserBox').style.display = 'none';
+    document.getElementById('generatorBox').style.display = 'none';
+    document.getElementById('searchLoading').style.display = 'inline-block';
+    
+    try {
+        // Вызываем search_api.php (предполагается, что он лежит в папке выше, но может быть в другом месте)
+        const response = await fetch('/cp/content/yandex-ai/search-module/search_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: query, max_results: 5 })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            lastSearchResults = data.results;
+            displaySearchResults(data.results);
+        } else {
+            showError('search', data.error);
+        }
+    } catch (e) {
+        showError('search', e.message);
+    } finally {
+        document.getElementById('searchLoading').style.display = 'none';
+    }
+}
+
+function displaySearchResults(results) {
+    const div = document.getElementById('searchResults');
+    div.innerHTML = `<h3>Найдено ${results.length} результатов:</h3>`;
+    for (let i = 0; i < results.length; i++) {
+        div.innerHTML += `
+            <div style="margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
+                <strong>${i+1}. <a href="${results[i].url}" target="_blank">${results[i].title}</a></strong><br>
+                <small>${results[i].domain}</small><br>
+                ${results[i].snippet}<br>
+                <button onclick="parseSingle('${results[i].url}')">📄 Парсить эту страницу</button>
+            </div>
+        `;
+    }
+    div.innerHTML += `<button onclick="parseAll()">📚 Парсить все страницы</button>`;
+}
+
+async function parseSingle(url) {
+    showParsing(true);
+    try {
+        const response = await fetch('/cp/content/yandex-ai/parser-module/parser_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'parse', url: url, use_cache: true })
+        });
+        const data = await response.json();
+        if (data.success) {
+            displayParsedResult([data]);
+        } else {
+            showError('parse', data.error);
+        }
+    } catch (e) {
+        showError('parse', e.message);
+    } finally {
+        showParsing(false);
+    }
+}
+
+async function parseAll() {
+    if (!lastSearchResults) return;
+    const urls = lastSearchResults.map(r => r.url);
+    showParsing(true);
+    try {
+        const response = await fetch('/cp/content/yandex-ai/parser-module/parser_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'parse_multiple', urls: urls, use_cache: true })
+        });
+        const data = await response.json();
+        if (data.success) {
+            const resultsArray = Object.values(data.results);
+            displayParsedResult(resultsArray);
+        } else {
+            showError('parse', data.error);
+        }
+    } catch (e) {
+        showError('parse', e.message);
+    } finally {
+        showParsing(false);
+    }
+}
+
+function displayParsedResult(parsedArray) {
+    const container = document.getElementById('parseResults');
+    container.innerHTML = '<h3>Спарсенные страницы:</h3>';
+    
+    let allText = '';
+    for (let i = 0; i < parsedArray.length; i++) {
+        const p = parsedArray[i];
+        if (p.success) {
+            container.innerHTML += `
+                <div style="margin-bottom: 15px;">
+                    <strong>${i+1}. ${escapeHtml(p.title || 'Без заголовка')}</strong><br>
+                    <small>${escapeHtml(p.url)}</small><br>
+                    Текст (первые 500 символов):<br>
+                    <pre>${escapeHtml(p.text.substring(0, 500))}${p.text.length > 500 ? '...' : ''}</pre>
+                </div>
+            `;
+            allText += p.text + "\n\n";
+        } else {
+            container.innerHTML += `<div>❌ Ошибка: ${escapeHtml(p.url)} – ${escapeHtml(p.error)}</div>`;
+        }
+    }
+    lastParsedText = allText;
+    container.innerHTML += `<button onclick="generate()">✨ Сгенерировать описание, габариты, применимость</button>`;
+    document.getElementById('parserBox').style.display = 'block';
+}
+
+async function generate() {
+    const text = lastParsedText;
+    if (!text) {
+        alert('Нет текста для генерации');
+        return;
+    }
+    document.getElementById('generatorBox').style.display = 'block';
+    document.getElementById('generatorOutput').innerHTML = '<div class="loading" style="display:inline-block;"></div> Генерация...';
+    
+    try {
+        const response = await fetch('/cp/content/yandex-ai/generator-module/generator_api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
+        const data = await response.json();
+        if (data.success) {
+            displayGeneratorResult(data);
+        } else {
+            document.getElementById('generatorOutput').innerHTML = `<div class="error">Ошибка: ${escapeHtml(data.error)}</div>`;
+        }
+    } catch (e) {
+        document.getElementById('generatorOutput').innerHTML = `<div class="error">Network error: ${escapeHtml(e.message)}</div>`;
+    }
+}
+
+function displayGeneratorResult(data) {
+    const out = document.getElementById('generatorOutput');
+    out.innerHTML = `
+        <h3>Результат генерации:</h3>
+        <div><strong>📝 Продающее описание:</strong><br>${escapeHtml(data.description)}</div>
+        <div><strong>📏 Габариты:</strong><br>
+            Вес: ${data.specifications.weight}<br>
+            Длина: ${data.specifications.length}<br>
+            Ширина: ${data.specifications.width}<br>
+            Высота: ${data.specifications.height}
+        </div>
+        <div><strong>🚗 Применимость (строки):</strong><br>${data.applicability_raw ? data.applicability_raw.map(escapeHtml).join('<br>') : '—'}</div>
+        <div><strong>🔢 ID узлов в дереве:</strong><br>${data.applicability_ids ? data.applicability_ids.join(', ') : '—'}</div>
+        <div><strong>📦 Полный JSON:</strong><br><pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre></div>
+    `;
+}
+
+function showError(step, msg) {
+    const container = step === 'search' ? document.getElementById('searchResults') : document.getElementById('parseResults');
+    container.innerHTML += `<div class="error">❌ Ошибка ${step}: ${msg}</div>`;
+}
+
+function showParsing(show) {
+    const loader = document.getElementById('parseLoading');
+    if (!loader) return;
+    loader.style.display = show ? 'inline-block' : 'none';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+</script>
+</body>
+</html>

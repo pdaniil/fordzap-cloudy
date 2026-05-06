@@ -1,0 +1,9 @@
+{
+    "require": {
+        "telegram-bot/api": "^2.5",
+        "league/csv": "9.2.0",
+        "guzzlehttp/guzzle": "6.5",
+        "dompdf/dompdf": "^3.0",
+        "chillerlan/php-qrcode": "2.0.8"
+    }
+}

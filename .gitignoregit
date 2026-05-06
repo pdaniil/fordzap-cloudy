@@ -1,0 +1,1 @@
+content/files/images/ *.csv *.png *.jpg *.jpeg composer.phar add .gitignoregit commit -m Ignore images and binaries

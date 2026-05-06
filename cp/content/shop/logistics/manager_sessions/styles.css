@@ -1,0 +1,85 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v8.4.14,
+* Autoprefixer: v10.4.7
+* Browsers: last 4 version
+*/
+
+#timerContainer {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    margin: 20px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#timerSvg {
+    width: 100%;
+    height: auto;
+}
+
+#timeText {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    color: #333;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.sessionButton {
+    padding: 10px 21px;
+    margin: 5px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    -webkit-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    transition: all 0.2s;
+}
+
+#openSessionBtn {
+    background-color: #4caf50;
+    color: white;
+}
+
+#closeSessionBtn {
+    background-color: #f44336;
+    color: white;
+}
+
+.sessionButton:hover {
+    opacity: 0.9;
+    border: 1px solid #ccc;
+}
+
+#closeSessionBtn {
+    display: none;
+}
+
+#sessionStart {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    padding: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    width: 100%;
+}

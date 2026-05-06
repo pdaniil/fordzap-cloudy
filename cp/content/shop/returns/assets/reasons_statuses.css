@@ -1,0 +1,20 @@
+.block_settings {
+    display: flex;
+    margin: 5px;
+    font-size: 14px;
+}
+
+.delete_icon i {
+    padding: 8px;
+    margin-left: 5px;
+    cursor: pointer;
+    color: #2f2b2b;
+}
+.block_add_setting {
+    display: flex;
+    justify-content: center;
+}
+.block_add_setting .content_reason {
+    font-size: 24px;
+    cursor: pointer;
+}

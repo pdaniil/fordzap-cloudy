@@ -1,0 +1,1 @@
+INSERT INTO `sms_api` (`id`, `name`, `parameters`, `parameters_values`, `description`, `active`, `handler`) VALUES (NULL, 'semysms.net', '[{\"name\":\"token\",\"type\":\"text\",\"caption\":\"Токен\"},{\"name\":\"device\",\"type\":\"text\",\"caption\":\"ID устройства\"}]', '{\"token\":\"ada807922bd3303f0736a6577dcfcf2c\",\"device\":\"310451\"}', '', '1', 'semysms');
