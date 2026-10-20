@@ -497,10 +497,29 @@ if($DP_Config->product == "expancart")
 													setTimeout(socialCountUnseenMessages, 60000); // Каждую минуту обновляем непрочитанные сообщения
 												}
 												socialCountUnseenMessages();
+												
+												function counter_user_self_records_query()
+												{
+													$.post("https://fordzap.com/cp/content/car_service/ajax_get_count_user_records.php", {
+														api: "countUnseenMessages"
+													}, function(res){
+														
+														if(res.count > 0){
+															$("#counter_user_self_records").text(res.count).removeClass('d-none');
+															("#counter_user_self_records").addClass('counter_user_self_records');
+														}else{
+															$("#counter_user_self_records").text('📞').removeClass('counter_user_self_records');
+														}
+													});
+													setTimeout(counter_user_self_records_query, 60000); // Каждую минуту обновляем непрочитанные сообщения
+												}
+												counter_user_self_records_query();
+												
 											</script>
 						                </li>
 										<!-- END Модуль сообщений из социальных сетей -->
-
+									
+										
 										<!-- START Модуль индикации непросмотренных VIN -->
 										<li id="not_viewed_vin" style="display:none;">
 											<a class="dropdown-toggle label-menu-corner" href="/<?php echo $DP_Config->backend_dir; ?>/requests" title="Запросы">
@@ -1616,6 +1635,273 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/lib/inputmask/phone_mask.php");
   }
 })();
 </script>
+
+
+
+<!-- Модальное окно для поиска по собственному наличию -->
+<div class="modal fade" id="modalSearchMainPage" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-xl-down modal-dialog-centered" id="modalSearchMainPageDialog">
+        <div class="modal-content">
+            <div class="modal-header mp-modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                <h3 class="mp-modal-title"><b>Поиск по собственному наличию</b></h3>
+            </div>
+            <div class="modal-body mp-modal-body">
+
+                <!-- Форма поиска (фильтр) -->
+                <form id="mpSearchForm" class="mp-search-form">
+                    <div class="mp-form-group">
+                        <label for="mpSearchName" class="mp-label">Найти товары</label>
+                        <input type="text" class="form-control mp-search-input" id="mpSearchName" placeholder="Введите текст для фильтрации">
+                    </div>
+                </form>
+
+                <!-- Счётчик найденных товаров -->
+                <div id="mpSearchCounter" style="display:none; margin-bottom:10px;">
+                    Найдено товаров: <span id="mpCounterValue">0</span>
+                </div>
+
+                <!-- Вкладки -->
+                <ul class="nav nav-tabs mp-tabs" role="tablist">
+                    <li role="presentation" class="active" id="mpTabIframeLi">
+                        <a href="#mpTabIframe" aria-controls="mpTabIframe" role="tab" data-toggle="tab" class="mp-tab-link">Исходная страница</a>
+                    </li>
+                    <li role="presentation" id="mpTabResultsLi">
+                        <a href="#mpTabResults" aria-controls="mpTabResults" role="tab" data-toggle="tab" class="mp-tab-link" onclick="document.querySelector('#mpUpdateIndicator').style.display = 'none';" >
+                            Результаты
+                            <span id="mpUpdateIndicator" style="display:none; background:#e74c3c; border-radius:50%; width:10px; height:10px; margin-left:6px;"></span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mp-tab-content">
+                    <!-- Вкладка с результатами (карточки) -->
+                    <div role="tabpanel" class="tab-pane active" id="mpTabResults">
+                        <div id="mpResultsContainer">
+                            <!-- Сюда будут вставлены карточки -->
+                        </div>
+                    </div>
+                    <!-- Вкладка с iframe -->
+                    <div role="tabpanel" class="tab-pane" id="mpTabIframe">
+                        <div class="embed-responsive mp-iframe-wrapper">
+                            <iframe id="mpIframeSearch" style="border: none; width: 100%; height: 100%;" src="about:blank" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* === УНИКАЛЬНЫЕ СТИЛИ ДЛЯ МОДАЛКИ ПОИСКА (префикс mp-) === */
+
+/* Заголовок */
+#modalSearchMainPage .mp-modal-header {
+    padding: 18px 25px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    border-radius: 12px 12px 0 0;
+}
+#modalSearchMainPage .mp-modal-title {
+    margin: 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+#modalSearchMainPage .mp-modal-body {
+    padding: 20px;
+    background: #fcfcfc;
+}
+
+/* Фильтр */
+.mp-search-form {
+    margin-bottom: 15px;
+}
+.mp-form-group {
+    position: relative;
+    margin-bottom: 10px;
+}
+.mp-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+.mp-search-input {
+    width: 100%;
+    padding: 10px 15px 10px 45px;
+    border-radius: 30px;
+    border: 2px solid #ddd;
+    height: 46px;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    background: #fff;
+}
+.mp-search-input:focus {
+    border-color: #5cb85c;
+    box-shadow: 0 0 8px rgba(92,184,92,0.3);
+    outline: none;
+}
+.mp-form-group::before {
+    content: "🔍";
+    position: absolute;
+    left: 15px;
+    bottom: 12px;
+    font-size: 20px;
+    opacity: 0.6;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* Счётчик */
+#mpSearchCounter {
+    font-size: 1.1em;
+    color: #2c3e50;
+    background: #e9f7ef;
+    padding: 8px 16px;
+    border-radius: 30px;
+    display: inline-block;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 15px;
+}
+
+/* Вкладки */
+.mp-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 20px;
+}
+.mp-tabs > li > a.mp-tab-link {
+    font-weight: 600;
+    color: #555;
+    border-radius: 8px 8px 0 0;
+    transition: 0.2s;
+    padding: 12px 20px;
+    border: none;
+}
+.mp-tabs > li.active > a.mp-tab-link {
+    background: #fff;
+    border-bottom: 3px solid #5cb85c;
+    color: #2c3e50;
+}
+.mp-tabs > li > a.mp-tab-link:hover {
+    background: #f0f0f0;
+}
+
+/* Обёртка iframe */
+.mp-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+@media (max-width: 768px) {
+    .mp-iframe-wrapper {
+        height: 50vh;
+    }
+}
+
+/* === КАРТОЧКИ ТОВАРОВ === */
+.mp-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 10px;
+}
+.mp-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 16px;
+    transition: 0.2s;
+    border: 1px solid #e9ecef;
+}
+.mp-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.mp-card-brand-article {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 4px;
+}
+.mp-card-brand-article .mp-brand {
+    color: #495057;
+}
+.mp-card-brand-article .mp-article {
+    color: #212529;
+    margin-left: 6px;
+}
+
+.mp-card-name {
+    font-size: 15px;
+    color: #6c757d;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+.mp-card-art-brand {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+.mp-card-art-brand strong {
+    color: #343a40;
+}
+.mp-card-status {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.mp-card-link {
+    display: inline-block;
+    color: #28a745;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px dashed #28a745;
+    padding-bottom: 2px;
+    transition: 0.2s;
+}
+.mp-card-link:hover {
+    color: #1e7e34;
+    border-bottom: 1px solid;
+}
+
+/* Адаптация для очень маленьких экранов */
+@media (max-width: 480px) {
+    .mp-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .mp-card {
+        padding: 12px;
+    }
+    .mp-card-name {
+        font-size: 16px;
+    }
+}
+
+/* Адаптация модалки */
+#modalSearchMainPage .modal-dialog {
+    max-width: 95vw;
+    width: auto;
+}
+@media (min-width: 1600px) {
+    #modalSearchMainPage .modal-dialog {
+        max-width: 1600px;
+    }
+} 
+
+</style> 
 
 </body>
 </html>

@@ -720,6 +720,7 @@ else//Аргументов нет - просто выводим список п�
 								<th><a href="javascript:void(0);" onclick="sortUsers('time_last_visit');" id="time_last_visit_sorter">Последний визит</a></th>
 								<th><a href="javascript:void(0);" onclick="sortUsers('admin_created');" id="admin_created_sorter">Способ создания</a></th>
 								<th><a href="javascript:void(0);" onclick="sortUsers('balance');" id="balance_sorter">Баланс</a></th>
+								<th><a href="javascript:void(0);" onclick="sortUsers('total_debt');" id="total_debt_sorter">Долг</a></th>
 								<th><a href="javascript:void(0);" onclick="sortUsers('unlocked');" id="unlocked_sorter">Разблок.</a></th>
 							</tr>
 							<script>
@@ -744,7 +745,7 @@ else//Аргументов нет - просто выводим список п�
 									$sort_asc_desc = "desc";
 								}
 								
-								if( array_search($sort_field, array('user_id', 'reg_variant', 'email', 'phone', 'time_registered', 'time_last_visit', 'admin_created', 'unlocked', 'balance') ) === false && array_search($sort_field,$profile_colomns_names_checked) === false )
+								if( array_search($sort_field, array('user_id', 'reg_variant', 'email', 'phone', 'time_registered', 'time_last_visit', 'admin_created', 'unlocked', 'balance', 'total_debt') ) === false && array_search($sort_field,$profile_colomns_names_checked) === false )
 								{
 									$sort_field = "user_id";
 								}
@@ -925,6 +926,30 @@ else//Аргументов нет - просто выводим список п�
 						`users`.`time_registered` AS `time_registered`,
 						`users`.`time_last_visit` AS `time_last_visit`,
 						($INCOME_SQL-$ISSUE_SQL) AS `balance`,
+						IFNULL(
+							(SELECT SUM(
+								(SELECT IFNULL(SUM(`price`*`count_need`-`price`*`count_need`*`discount`/100),0)
+								 FROM `shop_orders_items`
+								 WHERE `order_id` = `shop_orders`.`id`
+								   AND `status` IN (SELECT `id` FROM `shop_orders_items_statuses_ref` WHERE `count_flag` = 1)
+								)
+								+
+								(SELECT IFNULL(SUM((`price`*`count`)*(1-`discount`/100)),0)
+								 FROM `car_service_record_services`
+								 WHERE `record_id` = (SELECT `id` FROM `car_service_records` WHERE `orders_ids` = `shop_orders`.`id`)
+								)
+								-
+								(
+									(SELECT IFNULL(SUM(`amount`),0)
+									 FROM `shop_users_accounting`
+									 WHERE `order_id` = `shop_orders`.`id` AND `income` = 0 AND `active` = 1)
+									-
+									(SELECT IFNULL(SUM(`amount`),0)
+									 FROM `shop_users_accounting`
+									 WHERE `order_id` = `shop_orders`.`id` AND `income` = 1 AND `active` = 1)
+								)
+							) FROM `shop_orders` WHERE `shop_orders`.`user_id` = `users`.`user_id`)
+						, 0) AS `total_debt`,
 						`users`.`admin_created` AS `admin_created` ".$get_profile_cols_SQL.",  
 						(SELECT `chat_id` FROM `telegram_chats` WHERE `user_id` = `users`.`user_id`) AS `chat_id`
 							FROM
@@ -1093,6 +1118,7 @@ else//Аргументов нет - просто выводим список п�
 								<td><?php if($users_list_array["time_last_visit"] != "") echo $a_item.date("d.m.Y H:i:s", $users_list_array["time_last_visit"]); else echo $a_item."Никогда"; ?></a></td>
 								<td><?php if($users_list_array["admin_created"] == 1) echo $a_item."Администратор"; else echo $a_item."Регистрация"; ?></a></td>
 								<td style="white-space:nowrap;"><?php echo $a_item.number_format($users_list_array["balance"],2,'.',' '); ?></a></td>
+								<td style="white-space:nowrap;"><?php echo $a_item.number_format($users_list_array["total_debt"],2,'.',' '); ?></a></td>
 								<td class="text-center">
 									<?php 
 										if($users_list_array["unlocked"] == 1) 

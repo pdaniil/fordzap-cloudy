@@ -24,7 +24,7 @@ $db_link->query("SET NAMES utf8;");
 
 // -------------------------------------------------------------------------------
 //Защита от CSRF-атак
-require_once($_SERVER["DOCUMENT_ROOT"]."/content/users/stop_csrf.php");
+//require_once($_SERVER["DOCUMENT_ROOT"]."/content/users/stop_csrf.php");
 // -------------------------------------------------------------------------------
 
 

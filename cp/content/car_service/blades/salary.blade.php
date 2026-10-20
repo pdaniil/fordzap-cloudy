@@ -58,9 +58,9 @@
 							</span>
 							</div>
                             <div class="car_service_personal_salary_worker_percent"><?=($worker["service_percent"] ?? 0);?>%</div>
-                            <div>
+                            <div class="actions_wrapper">
                                 <?php if($balance > 0): ?>
-                                    <button class="car_service_personal_salary_pay_btn" onclick="carServicePersonalSalaryOpenModal(<?=$worker["id"] ?? '0';?>, '<?=$worker["fio"];?>', <?=$balance;?>)">
+                                    <button class="car_service_personal_salary_pay_btn action_node" onclick="carServicePersonalSalaryOpenModal(<?=$worker["id"] ?? '0';?>, '<?=$worker["fio"];?>', <?=$balance;?>)">
                                         <i class="fas fa-money-bill-wave" style="margin-right: 5px;"></i>Выплатить
                                     </button>
                                 <?php elseif($balance < 0): ?>
@@ -68,6 +68,10 @@
                                 <?php else: ?>
                                     <span class="car_service_personal_salary_paid">Оплачено</span>
                                 <?php endif; ?>
+                                <!-- Кнопка Печать -->
+                                <button class="car_service_personal_salary_print_btn action_node" onclick="openPrintModal(<?=$worker["id"] ?? '0';?>)">
+                                    <i class="fas fa-print"></i> Печать
+                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -104,37 +108,78 @@
                                     if($item["type"] == "record"):
                                         $workerAmount = $item["percent_salary"] ?? 0;
                                         $totalAccrued += $workerAmount;
+										
+										// --- ПОЛУЧАЕМ АВТОМОБИЛЬ ИЗ УСЛУГ ---
+										$car_display = '';
+										if (!empty($item["services"])) {
+											// Собираем уникальные значения car_info
+											$cars = array_unique(array_column($item["services"], 'car_info'));
+											$cars = array_filter($cars); // убираем пустые, null, false
+											if (!empty($cars)) {
+												$car_display = implode(', ', $cars);
+											}
+										}
+										// --- КОНЕЦ ДОБАВЛЕНИЯ ---  
+										
                                     ?> 
-                                        <div class="car_service_personal_salary_service_row record">
-                                            <div><?=date('d.m.Y H:i', strtotime($item["date"]));?></div>
-                                            <div>
-                                                <span class="car_service_personal_salary_type_badge type-record">Работа</span>
-                                            </div>
-                                            <div><?=number_format($item["price"], 0, '', ' ');?> руб.</div>
-                                            <div class="car_service_personal_salary_worker_amount positive">
-                                                +<?=number_format($workerAmount, 0, '', ' ');?> руб.
-                                                <?php if(isset($item["services"]) && !empty($item["services"])): ?>
-                                                    <span class="car_service_personal_salary_services_toggle" onclick="toggleServices(<?=$item['order_id']?>)">
-                                                        <i class="fas fa-chevron-down"></i>
-                                                    </span>
-                                                <?php endif; ?>
-                                            </div>
-                                            <div>
-                                                <?php if(isset($item["order_id"]) && $item["order_id"]): ?>
-                                                    <a class="car_service_personal_salary_order_btn" href="https://fordzap.com/cp/shop/orders/order?order_id=<?=$item["order_id"]?>" target="_blank">
-                                                        <i class="fas fa-external-link-alt" style="margin-right: 5px;"></i>Заказ
-                                                    </a>
-                                                <?php else: ?>
-                                                    <span class="car_service_personal_salary_no_order">Нет заказа</span>
-                                                <?php endif; ?>
-                                            </div>
-                                        </div>
+                                        <?php
+											// Определение класса для подсветки записи
+											$highlight_class = '';
+											if (!empty($item["order_id"]) && isset($item["order_status"])) {
+												$current_time = new DateTime();
+												$record_time = new DateTime($item["date"]);
+												
+												if ($current_time > $record_time) {
+													// Статусы 3, 6, 9 считаются выполненными
+													$completed_statuses = [3, 6, 9];
+													if (in_array($item["order_status"], $completed_statuses)) {
+														$highlight_class = 'completed';
+													} else {
+														$highlight_class = 'overdue';
+													}
+												}
+											}
+											?>
+
+											<div class="car_service_personal_salary_service_row record <?= $highlight_class; ?>">
+												
+												
+												<div><?=date('d.m.Y H:i', strtotime($item["date"]));?></div>
+												<div>
+													<span class="car_service_personal_salary_type_badge type-record">Работа</span>
+												</div>
+												<div><?=number_format($item["price"], 0, '', ' ');?> руб.</div>
+												<div class="car_service_personal_salary_worker_amount positive">
+													+<?=number_format($item["percent_salary"], 0, '', ' ');?> руб.
+													<?php if(isset($item["services"]) && !empty($item["services"])): ?>
+														<span class="car_service_personal_salary_services_toggle" onclick="toggleServices(<?=$item['order_id']?>)">
+															<i class="fas fa-chevron-down"></i>
+														</span>
+													<?php endif; ?>
+												</div>
+												<div>
+													<?php if(isset($item["order_id"]) && $item["order_id"]): ?>
+														<a class="car_service_personal_salary_order_btn" href="https://fordzap.com/cp/shop/orders/order?order_id=<?=$item["order_id"]?>" target="_blank">
+															<i class="fas fa-external-link-alt" style="margin-right: 5px;"></i>Заказ
+														</a>
+													<?php else: ?>
+														<span class="car_service_personal_salary_no_order">Нет заказа</span>
+													<?php endif; ?>
+												</div>
+												<?php if (!empty($car_display)): ?>
+													<div class="record_salary_header" style="flex: 0 0 100%;">
+														<i class="fas fa-car" style="margin-right: 3px; color: #3498db;"></i>
+														<?=htmlspecialchars($car_display);?>
+													</div>
+												<?php endif; ?>
+											</div>
                                         
 										<!-- Детализация по услугам -->
 										<?php if(isset($item["services"]) && !empty($item["services"])): ?>
 											<div class="car_service_personal_salary_services_detail" id="services_<?=$item['order_id']?>" style="display: none;">
 												<div class="car_service_personal_salary_services_header">
 													<div class="car_service_personal_salary_service_cell">Услуга</div>
+													<div class="car_service_personal_salary_service_cell">Авто</div>
 													<div class="car_service_personal_salary_service_cell">Тип начисления</div>
 													<div class="car_service_personal_salary_service_cell">Статус</div>
 													<div class="car_service_personal_salary_service_cell">Сумма</div>
@@ -144,6 +189,9 @@
 													<div class="car_service_personal_salary_service_item <?=!$service['is_ready'] ? 'not-ready' : '';?>">
 														<div class="car_service_personal_salary_service_cell">
 															<?=htmlspecialchars($service["service_name"]);?>
+														</div>
+														<div class="car_service_personal_salary_service_cell">
+															<?=htmlspecialchars($service["car_info"] ?? 'Не указано');?>
 														</div>
 														<div class="car_service_personal_salary_service_cell">
 															<?php if($service["payment_type"] == "fixed"): ?>
@@ -364,7 +412,64 @@
     </div>
 </div>
 
+<!-- Модальное окно для печати (обновлённое) -->
+<div class="car_service_personal_salary_modal" id="carServicePersonalPrintModal" style="display: none;">
+    <div class="car_service_personal_salary_modal_content">
+        <div class="car_service_personal_salary_modal_header">
+            <h3>Печать ведомости</h3>
+            <span class="car_service_personal_salary_modal_close" onclick="closePrintModal()">&times;</span>
+        </div>
+        <div class="car_service_personal_salary_modal_body">
+            <p>Выберите период для формирования ведомости:</p>
+            
+            <!-- Быстрый выбор периода -->
+            <div class="car_service_personal_salary_quick_periods" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px;">
+                <button type="button" class="car_service_personal_salary_quick_period_btn" data-period="day" style="padding: 6px 14px; background: #e0e7ff; border: 1px solid #3b82f6; border-radius: 6px; cursor: pointer; font-size: 13px;">День</button>
+                <button type="button" class="car_service_personal_salary_quick_period_btn" data-period="week" style="padding: 6px 14px; background: #e0e7ff; border: 1px solid #3b82f6; border-radius: 6px; cursor: pointer; font-size: 13px;">Неделя</button>
+                <button type="button" class="car_service_personal_salary_quick_period_btn" data-period="month" style="padding: 6px 14px; background: #e0e7ff; border: 1px solid #3b82f6; border-radius: 6px; cursor: pointer; font-size: 13px;">Месяц</button>
+                <button type="button" class="car_service_personal_salary_quick_period_btn" data-period="3months" style="padding: 6px 14px; background: #e0e7ff; border: 1px solid #3b82f6; border-radius: 6px; cursor: pointer; font-size: 13px;">3 месяца</button>
+                <button type="button" class="car_service_personal_salary_quick_period_btn" data-period="alltime" style="padding: 6px 14px; background: #e0e7ff; border: 1px solid #3b82f6; border-radius: 6px; cursor: pointer; font-size: 13px;">Всё время</button>
+            </div>
+            
+            <div class="car_service_personal_salary_form_group">
+                <label for="print_date_from">Дата начала</label>
+                <input type="date" id="print_date_from" class="car_service_personal_salary_form_input" value="<?=date('Y-m-01')?>">
+            </div>
+            <div class="car_service_personal_salary_form_group">
+                <label for="print_date_to">Дата окончания</label>
+                <input type="date" id="print_date_to" class="car_service_personal_salary_form_input" value="<?=date('Y-m-d')?>">
+            </div>
+            
+            <!-- Чекбокс скрытия деталей -->
+            <div class="car_service_personal_salary_form_group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+                <input type="checkbox" id="hide_details_checkbox" style="width: 18px; height: 18px;">
+                <label for="hide_details_checkbox" style="font-weight: normal; cursor: pointer;">Не показывать исходную сумму (только итоговый заработок)</label>
+            </div>
+        </div>
+        <div class="car_service_personal_salary_modal_footer">
+            <button type="button" class="car_service_personal_salary_modal_btn car_service_personal_salary_modal_btn_cancel" onclick="closePrintModal()">
+                Отмена
+            </button>
+            <button type="button" class="car_service_personal_salary_modal_btn car_service_personal_salary_modal_btn_confirm" onclick="generatePrint()">
+                <i class="fas fa-print" style="margin-right: 8px;"></i>Сформировать
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
+	/* Подсветка записей по статусу заказа и времени */
+	.car_service_personal_salary_service_row.record.completed {
+		border: 2px solid #27ae60;
+		background: rgba(39, 174, 96, 0.05);
+		box-shadow: 0 0 0 1px #27ae60;
+	}
+
+	.car_service_personal_salary_service_row.record.overdue {
+		border: 2px solid #e74c3c;
+		background: rgba(231, 76, 60, 0.05);
+		box-shadow: 0 0 0 1px #e74c3c;
+	}
     .car_service_personal_salary_container {
         margin: 0 auto;
         padding: 20px;
@@ -495,7 +600,19 @@
         font-weight: 600;
         color: #3498db;
     }
-    
+    .actions_wrapper {
+		display: flex;
+		grid-gap: 10px;
+		flex-direction: column;
+	}
+	.action_node {
+		display: flex;
+		max-height: 35px;
+		max-width: 135px;
+		justify-content: center;
+		grid-gap: 5px;
+		align-items: center;
+	}
     .car_service_personal_salary_pay_btn {
         background: linear-gradient(to right, #27ae60, #219653);
         color: white;
@@ -733,23 +850,30 @@
         padding: 0 10px;
     }
     
-    .car_service_personal_salary_service_cell:nth-child(1) {
-        flex: 0 0 30%;
-        max-width: 30%;
-    }
-    
-    .car_service_personal_salary_service_cell:nth-child(2) {
-        flex: 0 0 15%;
-        max-width: 15%;
-    }
-    
-    .car_service_personal_salary_service_cell:nth-child(3) {
-        max-width: 25%;
-    }
-    
-    .car_service_personal_salary_service_cell:nth-child(4) {
-        max-width: 30%;
-    }
+   	.car_service_personal_salary_service_cell:nth-child(1) {
+		flex: 0 0 25%;
+		max-width: 25%;
+	}
+	.car_service_personal_salary_service_cell:nth-child(2) {
+		flex: 0 0 15%;
+		max-width: 15%;
+	}
+	.car_service_personal_salary_service_cell:nth-child(3) {
+		flex: 0 0 12%;
+		max-width: 12%;
+	}
+	.car_service_personal_salary_service_cell:nth-child(4) {
+		flex: 0 0 18%;
+		max-width: 18%;
+	}
+	.car_service_personal_salary_service_cell:nth-child(5) {
+		flex: 0 0 15%;
+		max-width: 15%;
+	}
+	.car_service_personal_salary_service_cell:nth-child(6) {
+		flex: 0 0 15%;
+		max-width: 15%;
+	}
     
     .car_service_personal_salary_fix_price_hint {
         font-size: 11px;
@@ -1100,6 +1224,25 @@
         box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
     }
     
+    /* Кнопка печати */
+    .car_service_personal_salary_print_btn {
+        background: linear-gradient(to right, #3498db, #2980b9);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .car_service_personal_salary_print_btn:hover {
+        background: linear-gradient(to right, #2980b9, #2573a7);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+    
     @keyframes car_service_personal_salary_fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -1325,9 +1468,9 @@
         // Добавляем обработчики кликов на строки сотрудников
         document.querySelectorAll('.car_service_personal_salary_worker_row').forEach(row => {
             row.addEventListener('click', function(e) {
-                // Если клик был по кнопке "Выплатить", не обрабатываем выбор сотрудника
-                if (e.target.closest('.car_service_personal_salary_pay_btn')) {
-                    //return;
+                // Если клик был по кнопке "Выплатить" или "Печать", не обрабатываем выбор сотрудника
+                if (e.target.closest('.car_service_personal_salary_pay_btn') || e.target.closest('.car_service_personal_salary_print_btn')) {
+                    return;
                 }
                 
                 const workerId = this.dataset.workerId;
@@ -1337,6 +1480,8 @@
         
         // Инициализация обработчиков для модального окна
         carServicePersonalSalaryInitModalHandlers();
+        // Инициализация обработчиков для печатной модалки
+        carServicePersonalSalaryInitPrintModalHandlers();
     });
 
     // Функция выбора сотрудника
@@ -1534,7 +1679,7 @@
         if (confirm(`Выплатить ${carServicePersonalSalaryFormatNumber(payableAmount)} руб. сотруднику ${workerName}?`)) {
             postAjax({
                 action: 'pay_salary', 
-                worker_id: carServicePersonalSalarySelectedWorkerId, 
+                worker_id: carServicePersonalSalaryCurrentWorkerId, 
                 salary: payableAmount,
 				office_id : office_id
             }, false, 'reload_page');
@@ -1562,7 +1707,92 @@
     function carServicePersonalSalaryFormatNumber(number) {
         return new Intl.NumberFormat('ru-RU').format(Math.round(number));
     }
+
+    // ---------- Функции для печати (обновлённые) ----------
+    let printWorkerId = null;
+
+    function openPrintModal(workerId) {
+        printWorkerId = workerId;
+        // Устанавливаем даты по умолчанию: начало текущего месяца и сегодня
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        document.getElementById('print_date_from').value = firstDay.toISOString().split('T')[0];
+        document.getElementById('print_date_to').value = now.toISOString().split('T')[0];
+        // Сбрасываем чекбокс
+        document.getElementById('hide_details_checkbox').checked = false;
+        document.getElementById('carServicePersonalPrintModal').style.display = 'block';
+    }
+
+    function closePrintModal() {
+        document.getElementById('carServicePersonalPrintModal').style.display = 'none';
+        printWorkerId = null;
+    }
+
+    // Инициализация обработчиков для печатной модалки
+    function carServicePersonalSalaryInitPrintModalHandlers() {
+        // Кнопки быстрого выбора периода
+        document.querySelectorAll('.car_service_personal_salary_quick_period_btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const period = this.dataset.period;
+                const now = new Date();
+                let from = new Date();
+                let to = new Date(now);
+                switch(period) {
+                    case 'day':
+                        from = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        break;
+                    case 'week':
+                        from = new Date(now);
+                        from.setDate(now.getDate() - 7);
+                        break;
+                    case 'month':
+                        from = new Date(now.getFullYear(), now.getMonth(), 1);
+                        break;
+                    case '3months':
+                        from = new Date(now);
+                        from.setMonth(now.getMonth() - 3);
+                        break;
+                    case 'alltime':
+                        from = new Date(2000, 0, 1); // 1 января 2000
+                        break;
+                    default: return;
+                }
+                document.getElementById('print_date_from').value = from.toISOString().split('T')[0];
+                document.getElementById('print_date_to').value = to.toISOString().split('T')[0];
+            });
+        });
+
+        // Закрытие модалки при клике вне
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('carServicePersonalPrintModal');
+            if (event.target === modal) {
+                closePrintModal();
+            }
+        });
+    }
+
+    function generatePrint() {
+        if (!printWorkerId) {
+            alert('Ошибка: сотрудник не выбран');
+            return;
+        }
+        const dateFrom = document.getElementById('print_date_from').value;
+        const dateTo = document.getElementById('print_date_to').value;
+        if (!dateFrom || !dateTo) {
+            alert('Выберите диапазон дат');
+            return;
+        }
+        if (dateFrom > dateTo) {
+            alert('Дата начала не может быть позже даты окончания');
+            return;
+        }
+        const hideDetails = document.getElementById('hide_details_checkbox').checked ? '1' : '0';
+        // Открываем страницу печати в новом окне с параметром hide_details
+        const url = `/content/shop/print_docs/print_salary.php?worker_id=${printWorkerId}&from=${dateFrom}&to=${dateTo}&hide_details=${hideDetails}`;
+        window.open(url, '_blank');
+        closePrintModal();
+    }
 </script>
 
 <!-- Подключаем Font Awesome для иконок -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">  

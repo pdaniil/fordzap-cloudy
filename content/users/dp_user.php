@@ -1255,7 +1255,17 @@ class DP_User
 		
 		return $res !== false;
 	}
-	  
+
+	public static function getAllowMinusQuantity($user_id) {
+		global $db_link;
+		$sql = $db_link->prepare("SELECT `allow_minus_quantity` FROM `users` WHERE `user_id` = ?;");
+		$sql->execute([$user_id]);
+		
+		$res = $sql->fetch(PDO::FETCH_ASSOC);
+		
+		return $res["allow_minus_quantity"];
+	}
+	
 	public static function getStrTime($product_object) {
 		global $db_link;
 		

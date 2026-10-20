@@ -17,6 +17,12 @@ if( ! empty($_POST["save_action"]) )
     $category_id = $_POST["category_id"];
     $storages = json_decode($_POST["storages"], true);//Ключ - id скалада в системе
     
+    // Получение флага для текущего пользователя
+    require_once($_SERVER["DOCUMENT_ROOT"]."/content/users/dp_user.php");
+    $user_id = DP_User::getAdminId();
+    $allow_minus_quantity = DP_User::getAllowMinusQuantity($user_id);
+    $allow_minus_quantity_flag = ($allow_minus_quantity == 1);
+    
     $error_array = array();//Список ошибок
     $no_error = true;//Флаг - выполнено без ошибок
     
@@ -43,32 +49,44 @@ if( ! empty($_POST["save_action"]) )
 			$issued = $record["issued"];
 			$arrival_time = $record["arrival_time"];
 			$time_to_exe = $record["time_to_exe"];
-
-            //Заявка 43172
 			$cell_number = $record["cell_number"];
-
-			
 
 			if($record_id != 0)//Запись существующая - обновляем
 			{
+				// Получаем текущее наличие из БД (серверная проверка)
+				$current_exist_query = $db_link->prepare("SELECT `exist` FROM `shop_storages_data` WHERE `id` = ?;");
+				$current_exist_query->execute(array($record_id));
+				$current_exist_row = $current_exist_query->fetch();
+				$current_exist = $current_exist_row ? $current_exist_row["exist"] : 0;
+
+				if (!$allow_minus_quantity_flag && $exist < $current_exist) {
+					$error_msg = "Невозможно уменьшить наличие для записи ID $record_id (текущее: $current_exist, новое: $exist)";
+					array_push($error_array[$storage_id]["errors"], $error_msg);
+					$no_error = false;
+					continue;
+				}
+
 				$SQL_SAVE = "UPDATE `shop_storages_data` SET `price` = ?, `price_purchase` = ?, `price_crossed_out` = ?, `exist` = ?, `reserved` = ?, `issued` = ?, `arrival_time` = ?, `time_to_exe` = ?, `cell_number` = ?  WHERE `id` = ?;";
 				
 				$binding_values = array($price, $price_purchase, $price_crossed_out, $exist, $reserved, $issued, $arrival_time, $time_to_exe, $cell_number, $record_id);
+				
+				if( $db_link->prepare($SQL_SAVE)->execute($binding_values) != true)
+				{
+					array_push($error_array[$storage_id]["errors"], "Ошибка сохранения данных");
+					$no_error = false;
+				}
 			}
 			else//Запись новая - создаем
 			{
 				$SQL_SAVE = "INSERT INTO `shop_storages_data` (`storage_id`, `product_id`, `category_id`, `price`, `price_purchase`, `price_crossed_out`, `exist`, `reserved`, `issued`, `arrival_time`, `time_to_exe`, `cell_number`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?);";
 				
 				$binding_values = array($storage_id, $product_id, $category_id, $price, $price_purchase, $price_crossed_out, $exist, $reserved, $issued, $arrival_time, $time_to_exe, $cell_number);
-			}
-			
-
-			//Запрос в БД UPDATE/INSERT
-			if( $db_link->prepare($SQL_SAVE)->execute($binding_values) != true)
-			{
-				//Обработать ошибку
-				array_push($error_array[$storage_id]["errors"], "Ошибка сохранения данных");
-				$no_error = false;
+				
+				if( $db_link->prepare($SQL_SAVE)->execute($binding_values) != true)
+				{
+					array_push($error_array[$storage_id]["errors"], "Ошибка сохранения данных");
+					$no_error = false;
+				}
 			}
 		}//for($i)
 		
@@ -87,10 +105,8 @@ if( ! empty($_POST["save_action"]) )
 				array_push($binding_values, $records_deleted[$i]);
 			}
 			$SQL_DELETE .=";";
-			//Запрос на удаление
 			if( $db_link->prepare($SQL_DELETE)->execute( $binding_values ) != true)
 			{
-				//Обработать ошибку
 				array_push($error_array[$storage_id]["errors"], "Ошибка удаления записей");
 				$no_error = false;
 			}
@@ -124,7 +140,7 @@ if( ! empty($_POST["save_action"]) )
         }
         ?>
         <script>
-            location="<?php echo $DP_Config->domain_path.$DP_Config->backend_dir; ?>/shop/logistics/stock/product?product_id=<?php echo $product_id; ?>&success_message=<?php echo $success_message; ?>";
+            location="<?php echo $DP_Config->domain_path.$DP_Config->backend_dir; ?>/shop/logistics/stock/product?product_id=<?php echo $product_id; ?>&error_message=<?php echo urlencode($error_message); ?>";
         </script>
         <?php
         exit;
@@ -161,8 +177,6 @@ else//Действий нет - выводим страницу
 					<div class="panel_a_caption">Сохранить</div>
 				</a>
 				
-				
-				
 				<a class="panel_a" href="/<?php echo $DP_Config->backend_dir; ?>/shop/catalogue/products/product?category_id=<?php echo $category_id; ?>&product_id=<?php echo $product_id; ?>" target="_blank">
 					<div class="panel_a_img" style="background: url('/<?php echo $DP_Config->backend_dir; ?>/templates/<?php echo $DP_Template->name; ?>/images/cargo.png') 0 0 no-repeat;"></div>
 					<div class="panel_a_caption">Редактировать товар</div>
@@ -193,6 +207,9 @@ else//Действий нет - выводим страницу
     
     <script>
     // --------------------------------------------------------------------------------------
+    // Флаг, переданный с сервера (нужен для клиентской валидации)
+    var allow_minus_quantity_flag = <?= DP_User::getAllowMinusQuantity(DP_User::getAdminId()) ? 'true' : 'false'; ?>;
+    
     var storages = new Array();//Массив с объектами наличия по складам
     var storages_ids = new Array();//Массив с id складов (вспомогательный, т.к. ключи массива storages являются id складов и могут быть не по порядку)
     // --------------------------------------------------------------------------------------
@@ -210,6 +227,7 @@ else//Действий нет - выводим страницу
         new_record.reserved=0;
         new_record.issued=0;
         new_record.cell_number=0;
+        new_record.original_exist = 0; // для новых записей исходное наличие = 0 (ограничение не применяется)
         storages[storage_id].records.push(new_record);
         
         refreshStorageTable(storage_id);//Перерисовываем таблицу записей склада
@@ -257,6 +275,23 @@ else//Действий нет - выводим страницу
         refreshStorageTable(storage_id);//Перерисовываем таблицу
     }
     // --------------------------------------------------------------------------------------
+    // Валидация поля "Наличие" при потере фокуса
+    function validateExist(storage_id, i)
+    {
+        if (!allow_minus_quantity_flag) {
+            var input = document.getElementById("exist_"+storage_id+"_"+i);
+            if (!input) return;
+            var newVal = parseFloat(input.value);
+            var origVal = parseFloat(input.getAttribute("data-original-exist"));
+            if (!isNaN(newVal) && !isNaN(origVal) && newVal < origVal) {
+                alert("Вы не можете уменьшить наличие, так как у вас нет прав.");
+                input.value = origVal;
+                // Обновляем объект storages
+                storages[storage_id].records[i].exist = origVal;
+            }
+        }
+    }
+    // --------------------------------------------------------------------------------------
     //Перерисовка таблицы записей склада
     function refreshStorageTable(storage_id)
     {
@@ -274,7 +309,8 @@ else//Действий нет - выводим страницу
 	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"price_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'price');\" value=\""+storages[storage_id].records[i].price+"\" /></td>";
 	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"price_crossed_out_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'price_crossed_out');\" value=\""+storages[storage_id].records[i].price_crossed_out+"\" /></td>";
 	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"price_purchase_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'price_purchase');\" value=\""+storages[storage_id].records[i].price_purchase+"\" /></td>";
-	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"exist_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'exist');\" value=\""+storages[storage_id].records[i].exist+"\" /></td>";
+	            // Изменения для поля exist: добавляем data-original-exist и onblur
+	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"exist_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'exist');\" onblur=\"validateExist("+storage_id+","+i+");\" value=\""+storages[storage_id].records[i].exist+"\" data-original-exist=\""+storages[storage_id].records[i].original_exist+"\" /></td>";
 	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"reserved_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'reserved');\" value=\""+storages[storage_id].records[i].reserved+"\" /></td>";
 	            tbody_innerHTML += "<td><input class=\"form-control\" type=\"text\" id=\"issued_"+storage_id+"_"+i+"\" onKeyUp=\"dynamicApplying("+storage_id+","+i+", 'issued');\" value=\""+storages[storage_id].records[i].issued+"\" /></td>";
 	            tbody_innerHTML += "<td><div style=\"position:relative;width:160px;\">";
@@ -358,6 +394,8 @@ else//Действий нет - выводим страницу
     <?php
     //Получаем склады, с которыми может работать этот пользователь
     $user_id = DP_User::getAdminId();
+		
+	
     $storages_list = array();//Список с id складов (В этом списке ключ - id склада, а значение массив с id записей)
     
     //Получаем список складов с типом продукта 1:
@@ -461,17 +499,20 @@ else//Действий нет - выводим страницу
 			?>
 			<script>
 				//Добавляем объект записи в наш список
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length] = new Object;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].id = <?php echo $record_id; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].price = <?php echo $price; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].price_crossed_out = <?php echo $price_crossed_out; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].price_purchase = <?php echo $price_purchase; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].arrival_time = <?php echo $arrival_time; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].time_to_exe = <?php echo $time_to_exe; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].exist = <?php echo $exist; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].reserved = <?php echo $reserved; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].issued = <?php echo $issued; ?>;
-				storages[<?php echo $storage_id; ?>].records[storages[<?php echo $storage_id; ?>].records.length-1].cell_number = '<?php echo $cell_number; ?>';
+				var idx = storages[<?php echo $storage_id; ?>].records.length;
+				storages[<?php echo $storage_id; ?>].records[idx] = new Object;
+				storages[<?php echo $storage_id; ?>].records[idx].id = <?php echo $record_id; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].price = <?php echo $price; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].price_crossed_out = <?php echo $price_crossed_out; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].price_purchase = <?php echo $price_purchase; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].arrival_time = <?php echo $arrival_time; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].time_to_exe = <?php echo $time_to_exe; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].exist = <?php echo $exist; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].reserved = <?php echo $reserved; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].issued = <?php echo $issued; ?>;
+				storages[<?php echo $storage_id; ?>].records[idx].cell_number = '<?php echo $cell_number; ?>';
+				// Сохраняем исходное наличие для валидации
+				storages[<?php echo $storage_id; ?>].records[idx].original_exist = <?php echo $exist; ?>;
 			</script>
 			<?php
 		}

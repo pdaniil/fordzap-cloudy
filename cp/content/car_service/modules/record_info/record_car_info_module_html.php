@@ -29,10 +29,19 @@
 <label for="" class="col-lg-6 control-label">
 	Действия
 </label>
-<div class="col-lg-6" style="grid-gap: 5px;">
+<div class="col-lg-6" style="grid-gap: 5px; display: flex; flex-wrap: wrap;">
 	<button class="btn btn-warning" onclick="carModalOpen(false);">Детали</button>
 	<button class="btn btn-primary" onclick="carModalOpen(true);">Добавить</button>
 	<button class="btn btn-danger" onclick="delete_car();">Удалить</button>
+
+	<?php
+		// Модуль акта приёма — кнопка + скрипт
+		require_once($_SERVER["DOCUMENT_ROOT"]."/".$DP_Config->backend_dir."/content/car_service/modules/record_info/garage_module/acceptance_act_button.php");
+	?>
+	<?php
+		// Модуль акта приёма — кнопка + скрипт
+		require_once($_SERVER["DOCUMENT_ROOT"]."/".$DP_Config->backend_dir."/content/car_service/modules/record_info/garage_module/reclamation_button.php");
+	?>
 </div>
 </div>
 

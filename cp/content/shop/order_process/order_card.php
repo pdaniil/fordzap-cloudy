@@ -1236,6 +1236,15 @@ else//Действий нет - выводим страницу
 			</div>
 		</div>
 		
+		<div class="hpanel">
+				<?php 
+					if ($test_content_available) {
+						require_once($_SERVER["DOCUMENT_ROOT"] . "/". $DP_Config->backend_dir . "/content/car_service/modules/record_info/record_services_statements_log.php");
+					}
+					
+				?>
+		</div>
+		
     </div>
 
 

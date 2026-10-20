@@ -29,7 +29,7 @@ if( isset($_SERVER['HTTP_SEC_FETCH_DEST']) && $_SERVER['HTTP_SEC_FETCH_DEST'] ==
 		{
 			$('.alert-info').css('display', 'none');
 			$('.navbar-fixed-bottom').css('display', 'none');
-			$('#card_positions').css('display', 'none');
+			//$('#card_positions').css('display', 'none');
 			$('#footer-widgets').css('display', 'none');
 			$('#cookie-message').css('display', 'none');
 			$('#footer').css('display', 'none');
@@ -249,7 +249,7 @@ if((int)$group_info['for_percentage'] === 1){
 			$flag_show_data = 'false';
 		}
 	}
-	if( isset($_COOKIE["this_group_id_margin"]) )
+	/*if( isset($_COOKIE["this_group_id_margin"]) )
 	{
 		$group_query = $db_link->prepare('SELECT * FROM `groups`;');
 		$group_query->execute();
@@ -260,7 +260,7 @@ if((int)$group_info['for_percentage'] === 1){
 				break;
 			}
 		}
-	}
+	}*/
 ?>
 	<script>
 	var this_group_id_margin = <?php echo (int) $this_group_id_margin;?>;
@@ -453,7 +453,8 @@ if((int)$group_info['for_percentage'] === 1){
 // Блок для карточек
 echo '<div id="card_positions"></div>';
 ?>
-<script>
+<script>    
+
 /* Переменные для карточек проценки */
 	var min_price_original_block = new Object;
 	var min_price_analog_block = new Object;
@@ -643,7 +644,7 @@ if((int)$DP_Config->is_async_search == 1)
 		sam_price = 0;// Самые дешевые
 		sam_time = 0;// Самые быстрые поставки
 		sam_price_time = '';//Какая из кнопок была выбрана первой sam_price или sam_time
-
+		filter_today = 0;// >>> ДОБАВИТЬ
 		// Бренды
 		arr_manufacturers =  new Array();
 		// Найденные бренды после фильтрации
@@ -1956,6 +1957,7 @@ function getAnalogsList()
 		}
     });
 }
+ 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------
 var startBeforeRequestTime = 0;// Время начало опроса складов
 //Запрос данных о наличии товаров на складах
@@ -2870,6 +2872,7 @@ var this_filter = '';// Какой именно фильтр выбран
 var sam_price = 0;// Самые дешевые
 var sam_time = 0;// Самые быстрые поставки
 var sam_price_time = '';//Какая из кнопок была выбрана первой sam_price или sam_time
+var filter_today = 0;// Флаг фильтра «Только сегодня»
 
 // Бренды
 var arr_manufacturers =  new Array();
@@ -3035,7 +3038,21 @@ function showPropertiesWidgets()
 		</tr>';
 	}
 	
-	
+	// >>> ДОБАВИТЬ: чекбокс «Только сегодня» — отображаем только в iframe
+	$today_filter_html = '';
+	if( isset($_SERVER['HTTP_SEC_FETCH_DEST']) && $_SERVER['HTTP_SEC_FETCH_DEST'] == 'iframe' )
+	{
+		$today_filter_html = '
+		<tr>
+			<td>
+				<input style="width:20px; height:20px;" id="today_in_group" type="checkbox" onclick="in_check();"/>
+			</td>
+			<td style="padding-left:5px;">
+				<label for="today_in_group">Только сегодня (на складе)</label>
+			</td>
+		</tr>';
+	}
+	// <<< ДОБАВИТЬ
 	$btn_html = '
 	
 	<div style="margin:15px 0px 0px 0px;">
@@ -3076,6 +3093,7 @@ function showPropertiesWidgets()
 					<label for="min_time_in_group">Самые быстрые позиции</label>
 				</td>
 			</tr>
+			'. $today_filter_html .'
 			'. $show_all_group_html .'
 		</table>
 	</div>
@@ -3263,6 +3281,14 @@ function showPropertiesWidgets()
 			}
 		}
 		
+		// >>> ДОБАВИТЬ: восстановление чекбокса «Только сегодня»
+		if(document.getElementById('today_in_group')){
+			if(filter_today == 1){
+				document.getElementById('today_in_group').checked = true;
+			}
+		}
+		// <<< ДОБАВИТЬ
+		
 	}else{
 		reset_html = '';
 		reset_html_2 = '';
@@ -3339,6 +3365,16 @@ function in_check(){
 			}
 		}
 	}
+	
+	// >>> ДОБАВИТЬ: обработка чекбокса «Только сегодня»
+	if(document.getElementById("today_in_group")){
+		if(document.getElementById("today_in_group").checked){
+			filter_today = 1;
+		}else{
+			filter_today = 0;
+		}
+	}
+	// <<< ДОБАВИТЬ
 	
 	productsCountRequest('sam_price_time');
 }
@@ -3570,6 +3606,7 @@ function reset_filter(){
 	sam_price = 0;	
 	sam_time = 0;	
 	sam_price_time = '';	
+	filter_today = 0;   // >>> ДОБАВИТЬ
 	// Сбрасываем количество отображаемых элементов после применения фильтра
 	start_page_Required = 0;
 	start_page_SearchName = 0;
@@ -3672,6 +3709,22 @@ function filtering_items(ProductsObjects){
 	ProductsObjects = tmp_arr;
 	
 	return ProductsObjects;
+}
+
+// Фильтр «Только сегодня» — оставляем только позиции со сроком time_to_exe == 0 («На складе»)
+function today_filter_fanc(ProductsObjects){
+	if(filter_today != 1){
+		return ProductsObjects;
+	}
+	
+	var tmp_arr = new Array();
+	for(var p=0; p < ProductsObjects.length; p++){
+		// time_to_exe == 0 — товар на складе (придёт сегодня)
+		if(parseInt(ProductsObjects[p].time_to_exe) === 0){
+			tmp_arr.push(ProductsObjects[p]);
+		}
+	}
+	return tmp_arr;
 }
 
 // Функция определяем самые быстрые и дешевые позиции в объекте

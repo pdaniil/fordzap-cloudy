@@ -66,16 +66,17 @@ while( $group_record = $groups_query->fetch() )//Цикл по группам т
 	
 	if( count($products_objects) != 0)//Если объекты товаров
 	{
-		?>
-		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-		<?php
-		
 		if( $group_record["show_caption"] == true )//Если нужно показать название блока
 		{
 			?>
 			<h2 class="section-title"><?php echo $group_record["caption"]; ?></h2>
 			<?php
 		}
+		?>
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 main-page-products-wrapper" style="margin-bottom: 10px;">
+		<?php
+		
+		
 		
 		foreach( $products_objects AS $product_id => $product )
 		{

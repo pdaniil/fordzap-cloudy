@@ -41,7 +41,7 @@ try {
     // Запрос к внешнему API
     $client = new \GuzzleHttp\Client();
 
-    $url = "http://{$subdomain}.public.api.abcp.ru/search/articles";
+    $url = "https://{$subdomain}.public.api.abcp.ru/search/articles";
 
     try {
         $response = $client->request('GET', $url, [

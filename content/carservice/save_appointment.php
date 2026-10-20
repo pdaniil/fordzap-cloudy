@@ -181,7 +181,7 @@ if( $managers_record != false )
 	
 	//Значения переменных для уведомления
 	$notify_vars = array();
-	$notify_vars['link'] = "https://avtomaster.club/cp/car_service/sto_record?id=" . $id;
+	$notify_vars['link'] = "https://fordzap.com/cp/car_service/sto_record?id=" . $id;
 	$notify_vars['time'] = date('d.m.Y, H:i', ($_POST["time"] / 1000));
 	
 	//Отправляем уведомление

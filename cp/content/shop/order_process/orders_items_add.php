@@ -83,7 +83,6 @@ if(!empty($_POST["request_object"]))
 
 	$answer = array('status'=>false);
 	$request_object = json_decode($_POST['request_object'], true);
-	
 	if($request_object['office_id'] > 0){
 		$office_id = (int) $request_object['office_id'];
 	}

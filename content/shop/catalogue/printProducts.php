@@ -267,8 +267,8 @@ if( $product_block_type == 2 || $product_block_type == 3 )
 		</div>
 
 
-		<div class="showRestyle_name">Вид каталога</div>
-		<div class="showRestyle_wrap">
+		<div class="showRestyle_name" style="display: none;">Вид каталога</div>
+		<div class="showRestyle_wrap" style="display: none;">
 			<div class="showRestyle" id="showRestyle_1" onclick="showRestyle(1);"></div>
 			<div class="showRestyle" id="showRestyle_2" onclick="showRestyle(2);"></div>
 			<div class="showRestyle" id="showRestyle_3" onclick="showRestyle(3);"></div>
@@ -280,7 +280,7 @@ if( $product_block_type == 2 || $product_block_type == 3 )
 
 
 <!-- ПОЛЕ ДЛЯ ВЫВОДА ТОВАРОВ -->
-<div class="col-lg-12" id="products_area">
+<div class="col-lg-12 products_main_wrapper_new" id="products_area">
 
 	<div class="text-center" id="start_loading_div">
 		<p>Пожалуйста, подождите...</p><img class="loading_img" src="/content/files/images/ajax-loader-transparent.gif" />

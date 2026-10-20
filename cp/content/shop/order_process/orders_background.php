@@ -16,7 +16,7 @@
  * 5. Список складов, с которыми может работать данный менеджер
  * 
 */
-defined('_ASTEXE_') or die('No access');
+//defined('_ASTEXE_') or die('No access');
 
 
 //1.

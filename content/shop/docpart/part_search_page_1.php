@@ -586,7 +586,11 @@ function bindBunchResult(answer)
 		filter['storages_blok'].list_options[i].text = table;
 		filter['storages_blok'].list_options[i].search = String(arr_storages[i]);
 	}
-
+	
+	if (window.parent) {
+		window.parent.postMessage({ type: 'dataUpdated' }, '*');
+	}
+	
 }
 
 
@@ -722,6 +726,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 	
@@ -764,6 +770,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 		
@@ -805,6 +813,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 		
@@ -846,6 +856,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 		
@@ -883,6 +895,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 	
@@ -921,6 +935,8 @@ function resultReview()
 		
 		// Фильтрация позиций
 		if(this_filter != ''){ProductsObjects = filtering_items(ProductsObjects);}
+		// Фильтр «Только сегодня»
+		if(filter_today == 1){ProductsObjects = today_filter_fanc(ProductsObjects);}
 		// Если установлены флаги самых быстрых и дешевых позиций в группе
 		if(sam_price_time != ''){ProductsObjects = sam_price_time_fanc(ProductsObjects);}
 	
@@ -1199,7 +1215,7 @@ function resultReview()
 
 // ------------------------------------------------------------------------------------------------------------------------------
 
-
+window.isManagerMode = <?php echo (int)$group_info['for_percentage']; ?>;
 
 
 // Единая функция формирования HTML-кода для одной записи товара.
@@ -1237,14 +1253,14 @@ function getProductRecordHTML(Product, index, quantity, ProductType, blok)
 	if($DP_Config->currency_show_mode == "sign_before")
 	{
 		?>
-		price = '<?php echo $currency_indicator; ?> ' + price;
+		price = '<div>' + '<?php echo $currency_indicator; ?> ' + price + '</div>';
 		<?php
 	}
 	//Индикатор валюты после цены
 	else if($DP_Config->currency_show_mode == "sign_after" || $DP_Config->currency_show_mode == "short_name_after")
 	{
 		?>
-		price = price + ' <?php echo $currency_indicator; ?>';
+		price = '<div>' + price + ' <?php echo $currency_indicator; ?> </div>';
 		<?php
 	}
 	?>
@@ -1338,6 +1354,46 @@ function getProductRecordHTML(Product, index, quantity, ProductType, blok)
 	}
 	
 	info = '<span class="info_box">'+ info +'</span>';
+	
+	
+	 var isManager = (typeof window.isManagerMode !== 'undefined' && window.isManagerMode);
+
+    // Формируем иконки для мобильной версии (без обёртки info_box)
+    var mobileIconsHtml = '';
+    mobileIconsHtml += "<a title=\"Фотографии товара\" href=\"https://www.google.ru/search?q="+encodeURIComponent(ProductType.manufacturer)+"+"+ProductType.article+"&newwindow=1&biw=1366&bih=667&tbm=isch&tbo=u&source=univ&sa=X&ved=0CC8QsARqFQoTCMDCoO70jMkCFQGFLAodrT0GFw\" target=\"_blank\"><span><i style=\"font-size: .8em;\" class=\"fa fa-camera\"></i></span></a>";
+    mobileIconsHtml += "<a title=\"Где забрать\" href=\"javascript:void(0);\"><span onclick=\"openInfoWindow('Где забрать', '"+Product.office_caption+storage_caption+"');\" ><i class=\"fa fa-home\"></i></span></a>";
+	
+	<?php if (DP_User::getUserId() > 0) { ?>
+	
+    
+        mobileIconsHtml += "<a href=\"javascript:void(0);\" title=\"Добавить в блокнот\" onclick=\"show_add_bloknot("+Product.aid+");\"><span><i style=\"font-size: .9em;\" class=\"fa fa-car\"></i></span></a>";
+    <?php } else { ?> 
+        mobileIconsHtml += "<a href=\"javascript:void(0);\" title=\"Добавить в блокнот\" onclick=\"alert('Для добавления позиций в блокнот необходимо авторизоваться на сайте');\"><span><i style=\"font-size: .9em;\" class=\"fa fa-car\"></i></span></a>";
+   <?php } ?>
+    // Добавляем return-иконку (аналогично info)
+    if(Product.check_return !== "") {
+        let return_value = '';
+        if(Product.json_params !== '' && Product.json_params !== null) {
+            return_value_obj = JSON.parse(Product.json_params);
+            return_value = return_value_obj.return_value || '';
+        }
+        if(Product.check_return == "return") {
+            if(return_value !== undefined && return_value != '' ) {
+                mobileIconsHtml += "<span class=\"product-return-icon-value success\"><span data-tooltip=\"Процент удержания за возврат товара "+return_value+"%\" class=\"product-return-icon-tooltip\"></span>"+return_value+"%</span>";
+            } else {
+                mobileIconsHtml += "<span class=\"product-return-icon success\"><span data-tooltip=\"Возврат возможен\" class=\"product-return-icon-tooltip\"></span></span>";
+            }
+        } else if(Product.check_return == "no_return") {
+            mobileIconsHtml += "<span class=\"product-return-icon error\"><span data-tooltip=\"Внимание! Эта деталь не подлежит возврату или обмену!\" class=\"product-return-icon-tooltip\"></span></span>";
+        }
+    }
+
+    // Для менеджера добавляем название склада
+    var managerInfoHtml = '';
+    if (isManager) {
+        managerInfoHtml = '<span class="storage-caption">' + Product.storage_caption + '</span>';
+    }
+	
 	
     //Формирование колонки "Наличие"
     //Объект с описанием наличия - для отображения в информационном окне
@@ -1445,17 +1501,26 @@ function getProductRecordHTML(Product, index, quantity, ProductType, blok)
 		p_exist = 1;
 	}
 	
-	cart_html = '<div style="text-align: center; line-height: 1em;"><table>';
-		cart_html += '<tr><td><a style="font-size: 20px; padding-right: 3px;" href="javascript:void(0);" onclick="addToCart('+Product.aid+');"><span><i class="fa fa-shopping-cart"></i></span></a></td></tr>';
-		cart_html += '<tr><td><div style="text-align: center; background: #f9f9f9; border: 1px solid #ddd; padding: 2px 1px; border-radius: 3px; font-size: 11px; margin-bottom: 1px;"><table><tr>';
-			cart_html += "<td><a style='width:12px;' onclick=\"minusCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" class=\"count_need_minus\" href=\"javascript:void(0);\"><i class=\"fa fa-minus\"></i></a></td>";
-			cart_html += "<td><input style=\"text-align:center; width:24px; font-size: 10px; height: 14px; margin: 0px 2px; vertical-align: middle; border: 1px solid #ddd; border-radius: 2px !important; box-shadow: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;\" type=\"text\" value=\""+p_min_order+"\" onChange=\"onKeyUpCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" id=\"count_need_"+Product.aid+"\" /></td>";
-			cart_html += "<td><a style='width:12px;' onclick=\"plusCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" class=\"count_need_plus\" href=\"javascript:void(0);\"><i class=\"fa fa-plus\"></i></a></td>";
-		cart_html += '</tr></table></div></td></tr>';
-	cart_html += '</table></div>';
-	//////////////////////////////////////////////////////////////////////////////////////////////
+	// --- Десктопная версия корзины (с полями количества) ---
+	var desktop_cart_html = '<div style="text-align: center; line-height: 1em;"><table>';
+	desktop_cart_html += '<tr><td><a style="font-size: 20px; padding-right: 3px;" href="javascript:void(0);" onclick="addToCart('+Product.aid+');"><span><i class="fa fa-shopping-cart"></i></span></a></td></tr>';
+	desktop_cart_html += '<tr><td><div style="text-align: center; background: #f9f9f9; border: 1px solid #ddd; padding: 2px 1px; border-radius: 3px; font-size: 11px; margin-bottom: 1px;"><table><tr>';
+	desktop_cart_html += "<td><a style='width:12px;' onclick=\"minusCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" class=\"count_need_minus\" href=\"javascript:void(0);\"><i class=\"fa fa-minus\"></i></a></td>";
+	desktop_cart_html += "<td><input style=\"text-align:center; width:24px; font-size: 10px; height: 14px; margin: 0px 2px; vertical-align: middle; border: 1px solid #ddd; border-radius: 2px !important; box-shadow: none; -webkit-appearance: none; -moz-appearance: none; appearance: none;\" type=\"text\" value=\""+p_min_order+"\" onChange=\"onKeyUpCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" id=\"count_need_"+Product.aid+"\" /></td>";
+	desktop_cart_html += "<td><a style='width:12px;' onclick=\"plusCountNeed("+Product.aid+", "+p_exist+", "+p_min_order+");\" class=\"count_need_plus\" href=\"javascript:void(0);\"><i class=\"fa fa-plus\"></i></a></td>";
+	desktop_cart_html += '</tr></table></div></td></tr>';
+	desktop_cart_html += '</table></div>';
+
+	// --- Мобильная версия (простая кнопка) ---
+	var mobile_cart_html = '<div class="mobile-cart-row">' +
+        '<a href="javascript:void(0);" onclick="addToCart('+Product.aid+');" class="mobile-cart-button">В корзину</a>' +
+        '<div class="mobile-manager-info">' + managerInfoHtml + mobileIconsHtml + '</div>' +
+        '</div>';
+
+	var cart_html = '<div class="desktop-cart-wrapper">' + desktop_cart_html + '</div>' +
+					'<div class="mobile-cart-wrapper">' + mobile_cart_html + '</div>';
 	
-	
+	  
 	// <!-------------------------------------------- Картинки в проценке -------------------------------------------->
 
 	let key = list_products_info.findIndex(item => item.manufacturer == Product.manufacturer && item.article == Product.article);
@@ -1501,7 +1566,7 @@ function getProductRecordHTML(Product, index, quantity, ProductType, blok)
 		timeToExe = Product.delivery;
 	}
 	
-    return start_wrap_div + '<td class="td_manufacturer">'+ manufacturer + show_hide_button +'</td><td class="td_article">'+ article_show +'</td><td class="td_name">'+ name +'</td><td class="td_exist">'+ exist +'</td><td class="td_time_to_exe">'+timeToExe+'</td><td class="td_info">'+ info +'</td><td class="td_price">'+ price +'</td><td class="td_add_to_cart">'+ cart_html +'</td>'+ '<td class="td_color" style="background:'+color+'"></td>' + end_wrap_div;
+    return start_wrap_div + '<td class="td_manufacturer">'+ manufacturer + show_hide_button +'</td><td class="td_article">'+ article_show +'</td><td class="td_name">'+ name +'</td><td class="td_exist">'+ exist +'</td><td class="td_time_to_exe">'+timeToExe+'</td><td class="td_info" data-storage-id="'+Product.storage_id+'" data-product-id="'+Product.product_id+'">'+ info +'</td><td class="td_price">'+ price +'</td><td class="td_add_to_cart">'+ cart_html +'</td>'+ '<td class="td_color" style="background:'+color+'"></td>' + end_wrap_div;
 }
 
 

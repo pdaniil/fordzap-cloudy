@@ -103,6 +103,7 @@ else
 			<div class="form-group">
 				<?php if (DP_User::isUserServiceMaster(DP_User::getUserId())) : ?>
 				<a href="/worker_salary?period=month" class="btn btn-ar btn-success" style="color: #468d46 !important; text-align: center; font-weight: bold;">Мои финансы</a>
+				<a href="https://fordzap.com/content/carservice/admin_console/index.php" class="btn btn-ar btn-success" style="color: #468d46 !important; text-align: center; font-weight: bold;">Мои работы</a>
 				<?php endif; ?>
 				<a href="/users/profile" class="btn btn-ar btn-success btn_profile" style="color:#FFF;">Мои данные</a>
 				

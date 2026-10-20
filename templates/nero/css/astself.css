@@ -2020,7 +2020,7 @@ header .schearch-line .header-cat-btn i {
     color: #000;
     position: absolute;
     top: 15px;
-    right: 115px;
+    right: 65px;
     font-weight: 600;
   }
 
@@ -2867,71 +2867,178 @@ label {
 
 /* ***************************************************************************************************** */
 
+/* Стили для панели быстрого поиска */
+/* Стили для панели быстрого поиска */
 .search-simple-bar {
-  position: absolute;
-  z-index: 5;
-  background: #fff;
-  top: 100%;
-  width: 100%;
-  border-radius: 6px;
-  border: 1px solid #e4e4e4;
+    position: absolute;
+    z-index: 9999;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 600px;
+    margin-top: 48px;
 }
 
-.search-simple-bar .search-simple-bar-content {
-  overflow: hidden;
+.search-simple-bar-content {
+    max-height: 350px;
+    overflow-y: auto;
 }
 
-.search-simple-bar .table-div {
-  overflow: auto;
-  max-height: 350px;
-  margin-right: -20px;
-  margin-bottom: -20px;
-  white-space: normal;
+.search-simple-bar .table {
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 0;
 }
 
+.search-simple-bar .table td {
+    padding: 8px 12px;
+    border-top: 1px solid #f0f0f0;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Первая колонка (артикул) */
+.search-simple-bar .table td:first-child {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
+    white-space: normal;
+    word-break: break-all;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Вторая колонка (производитель + название) */
 .search-simple-bar .table td:last-child {
-  min-width: 200px;
-  padding-right: 25px;
-  word-break: break-all;
+    width: auto;
+    word-break: break-word;
+    white-space: normal;
 }
 
-.search-simple-bar .table * {
-  border-color: #e4e4e4;
-  line-height: 1.1em;
-  vertical-align: middle;
+/* Товары в наличии - зеленая полоса */
+.search-simple-bar .table tr[data-source="catalog"] td:first-child {
+    border-left: 3px solid #4CAF50;
 }
 
-.search-simple-bar .table tr:hover {
-  background: #e4e4e4;
+/* Товары под заказ - желтая полоса */
+.search-simple-bar .table tr[data-source="catalog_no_stock"] td:first-child {
+    border-left: 3px solid #FFC107;
 }
 
-@media (max-width: 767px) {
-  .search-simple-bar {
+/* История - синяя полоса */
+.search-simple-bar .table tr[data-source="history"] td:first-child {
+    border-left: 3px solid #2196F3;
+}
+
+/* Другие товары - серая полоса */
+.search-simple-bar .table tr[data-source="other"] td:first-child {
+    border-left: 3px solid #9E9E9E;
+}
+
+/* Стили для бейджей */
+.search-simple-bar .badge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    margin-top: 3px;
+}
+
+.search-simple-bar .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    line-height: 14px;
+}
+
+/* Бейдж с ценой */
+.search-simple-bar .badge-price {
+    background: #E3F2FD;
+    color: #0D47A1;
+    border: 1px solid #90CAF9;
+    font-weight: 700;
+}
+
+/* Строка-разделитель секций */
+.search-simple-bar .section-divider {
+    background: #F5F5F5;
+    padding: 6px 12px;
     font-size: 12px;
-    top: 41px;
-  }
-
-  .search-simple-bar .table-div {
-    max-height: 200px;
-  }
-  
-	.header-user-box .new-header-user-box .form-group .btn_return:before {
-	  content: "\f060";
-	}
-	
-	.header-user-box .new-header-user-box .form-group .btn_requests:before {
-	  content: "\f135";
-	}
+    color: #555;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #E0E0E0;
+    border-bottom: 1px solid #E0E0E0;
 }
 
-
-@media (max-width: 991px) {
-  .mainContainer img{
-	  max-width:100%;
-	  height:auto;
-  }
+.search-simple-bar .section-divider td {
+    padding: 6px 12px !important;
+    background: #F5F5F5;
+    color: #555;
+    font-weight: 600;
 }
 
+/* Стили для скроллбара */
+.search-simple-bar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-simple-bar-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.search-simple-bar-content::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.search-simple-bar-content::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Адаптив для мобильных устройств */
+@media (max-width: 768px) {
+    .search-simple-bar {
+        max-width: 100%;
+        top: 40px;
+        left: 0px;
+        right: 10px;
+        width: 100%;
+        margin-top: 0;
+    }
+    
+    .search-simple-bar .table td:first-child {
+        width: 90px;
+        min-width: 90px;
+        max-width: 90px;
+        font-size: 13px;
+    }
+    
+    .search-simple-bar .table td:last-child {
+        font-size: 13px;
+    }
+    
+    .search-simple-bar .badge {
+        font-size: 8px;
+        padding: 1px 6px;
+    }
+    
+    .search-simple-bar .section-divider {
+        font-size: 10px;
+        padding: 4px 10px;
+    }
+}
 /* ***************************************************************************************************** */
 
 #cookie-message {
@@ -3157,4 +3264,10 @@ opacity: 1;
     #all_table_products > tbody > tr {
         overflow: visible !important; 
     }
+}
+
+.main-page-products-wrapper {
+	display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
 }

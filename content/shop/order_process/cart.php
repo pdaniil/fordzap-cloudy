@@ -34,6 +34,16 @@ else
 
 require_once($_SERVER["DOCUMENT_ROOT"]."/content/users/dp_user.php");
 $user_id = DP_User::getUserId();
+
+if($user_id > 0)
+{
+    $order_link = "/shop/checkout/how_get";//Сразу на страницу выбора способа получения
+}
+else
+{
+    $order_link = "/shop/checkout/login_offer";//Предложить авторизацию
+}
+
 if($user_id > 0)
 {
 	//Поля для авторизованного пользователя
@@ -83,6 +93,369 @@ while($cart_record = $cart_records_query->fetch() )
 	width: 25px;
     height: 25px;
 }
+
+/* ---------- Общие стили корзины ---------- */
+#cart_area .table input[type="checkbox"] {
+    width: 25px;
+    height: 25px;
+}
+
+.cart-mobile-header {
+    display: none;
+}
+
+/* Контейнер корзины */
+.cart-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Строка (заголовок или товар) */
+.cart-row {
+    display: grid;
+    align-items: center;
+    padding: 10px 14px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transition: background 0.2s;
+}
+
+/* Заголовок */
+.cart-header {
+    background: #f8f9fa;
+    font-weight: 700;
+    font-size: 12px;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Ячейки-колонки */
+.cart-col {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* -------------------- Десктопная версия -------------------- */
+.cart-row.has-image {
+    grid-template-columns: 40px 60px 1fr 1fr 1fr 1fr 120px 1fr 1fr;
+}
+.cart-row.no-image {
+    grid-template-columns: 40px 1fr 1fr 1fr 1fr 120px 1fr 1fr;
+}
+
+/* Чекбокс */
+.cart-col-checkbox {
+    justify-content: center;
+}
+.cart-col-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Изображение */
+.cart-col-image img {
+    max-width: 50px;
+    max-height: 70px;
+    object-fit: contain;
+}
+
+/* Новая колонка "Товар" (производитель + артикул + наименование) */
+.cart-col-product {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+}
+.cart-col-product .product-main {
+    font-weight: 600;
+}
+.cart-col-product .product-sub {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+/* Срок поставки */
+.cart-col-term .hh,
+.cart-col-term .mm {
+    display: inline-block;
+    font-weight: 600;
+}
+.cart-col-term .mm {
+    font-size: 0.7em;
+    vertical-align: super;
+}
+
+/* Количество */
+.cart-col-quantity .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.cart-col-quantity .qty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #f1f3f5;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    user-select: none;
+    transition: background 0.15s;
+}
+.cart-col-quantity .qty-btn:hover {
+    background: #e9ecef;
+}
+.cart-col-quantity .qty-input {
+    width: 44px;
+    height: 28px;
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    padding: 0 4px;
+}
+
+/* Действия */
+.cart-col-actions {
+    justify-content: flex-end;
+    gap: 6px;
+}
+.cart-col-actions .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    transition: all 0.15s;
+    cursor: pointer;
+}
+.cart-col-actions .action-btn:hover {
+    background: #f1f3f5;
+    color: #212529;
+}
+.cart-col-actions .action-btn .fa {
+    font-size: 18px;
+}
+.cart-col-actions .action-btn .fa-refresh {
+    font-size: 16px;
+}
+.cart-col-actions .action-btn .fa-car {
+    font-size: 16px;
+}
+.cart-col-actions .action-btn .fa-times {
+    font-size: 20px;
+}
+
+/* Информационные блоки */
+.cart-info-block {
+    padding: 14px 18px;
+    margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    background: #f8f9fa;
+    font-size: 12px;
+}
+.cart-info-block i {
+    margin-right: 8px;
+}
+
+/* Итого */
+.cart-total {
+    text-align: right;
+    font-weight: 700;
+    padding: 12px 0;
+    font-size: 1.4rem;
+}
+.cart-total .total-label {
+    font-weight: 400;
+    font-size: 16px;
+    color: #6c757d;
+}
+
+/* Кнопки внизу */
+.cart-actions-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+.cart-actions-bottom .btn {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.15s;
+}
+
+.cart-col-storage {
+	margin-left: 10px;
+}
+
+/* -------------------- Мобильная версия (≤ 768px) -------------------- */
+@media (max-width: 768px) {
+    .cart-header {
+        display: none !important;
+    }
+
+    /* Переопределяем сетку для всех строк корзины */
+    .cart-row,
+    .cart-row.has-image,
+    .cart-row.no-image {
+        display: grid;
+        grid-template-columns: 30px 1fr 1fr 1fr;  /* 4 колонки: чекбокс + 3 информационные */
+        grid-template-rows: auto auto auto auto auto; /* 5 строк */
+        gap: 6px 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        align-items: center;
+    }
+
+    /* Чекбокс – первая колонка, первая строка */
+    .cart-col-checkbox {
+        grid-row: 1;
+        grid-column: 1;
+        justify-content: center;
+        align-self: start;
+    }
+    .cart-col-checkbox input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    /* Название товара – первая строка, занимает оставшиеся 3 колонки */
+    .cart-col-product {
+        grid-row: 1;
+        grid-column: 2 / span 3;
+        align-items: flex-start;
+    }
+
+    /* Изображение – вторая строка, только во второй колонке (как было) */
+    .cart-col-image {
+        grid-row: 3;
+        grid-column: 2;
+    }
+
+    /* Склад, срок доставки, цена – третья строка, по одной колонке */
+    .cart-col-storage {
+        grid-row: 2;
+        grid-column: 4;
+        margin-left: 0; /* убираем лишний отступ */
+    }
+    .cart-col-term {
+        grid-row: 2;
+        grid-column: 3;
+    }
+    .cart-col-price {
+        grid-row: 2;
+        grid-column: 2;
+    }
+
+    /* Количество и итого – четвёртая строка */
+    .cart-col-quantity {
+        grid-row: 4;
+        grid-column: 2;
+    }
+    .cart-col-sum {
+        grid-row: 4;
+        grid-column: 3;
+        font-weight: 600;
+		width: 100px;
+    }
+
+    /* Кнопки действий – пятая строка, на всю ширину информационной части */
+    .cart-col-actions {
+        grid-row: 5;
+        grid-column: 2 / span 3;
+        justify-content: flex-start;
+        gap: 8px;
+        margin-top: 6px;
+    }
+
+    /* Стилизация элементов управления количеством и кнопок */
+    .cart-col-quantity .qty-controls {
+        justify-content: flex-start;
+    }
+    .cart-col-actions .action-btn {
+        width: 40px;
+        height: 40px;
+        background: #f1f3f5;
+        border-radius: 8px;
+    }
+    .cart-col-actions .action-btn .fa {
+        font-size: 20px;
+    }
+
+    /* Изображение – без изменений */
+    .cart-col-image img {
+        max-width: 50px;
+        max-height: 70px;
+        object-fit: contain;
+    }
+
+    /* Информационные блоки */
+    .cart-info-block {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+
+    /* Итого и кнопки внизу */
+    .cart-total {
+        font-size: 16px;
+        padding: 8px 0;
+    }
+    .cart-actions-bottom {
+        justify-content: center;
+        gap: 8px;
+    }
+    .cart-actions-bottom .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    .cart-info-block .btn {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    /* Мобильный хедер с чекбоксом "Выделить всё" */
+    .cart-mobile-header {
+        display: flex;
+        align-items: center;
+        padding: 10px 16px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .cart-mobile-header input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+    .cart-mobile-header label {
+        margin: 0;
+        cursor: pointer;
+    }
+}  
+
 </style>
 
 
@@ -102,417 +475,280 @@ else
     <script>
     // --------------------------------------------------------------------------------------
     //Переотобразить корзину
-    function refreshCartArea()
-    {
-		//Строки с суммой в корзине
-		sum_total = Number(sum_total).toFixed(2);
-		var sum_total_num = Number(sum_total);
-		sum_total = digit(sum_total);
+// --------------------------------------------------------------------------------------
+// Переотобразить корзину
+function refreshCartArea() {
+    sum_total = Number(sum_total).toFixed(2);
+    var sum_total_num = Number(sum_total);
+    sum_total = digit(sum_total);
 
-		let update_order_items_check = false;
-
-		<?php
-		//Индикатор валюты перед ценой
-		if($DP_Config->currency_show_mode == "sign_before")
-		{
-			?>
-			sum_total = '<font class=\"currency\"><?php echo $currency_indicator; ?></font> <font class=\"price\">' + sum_total + "</font>";
-			<?php
-		}
-		//Индикатор валюты после цены
-		else if($DP_Config->currency_show_mode == "sign_after" || $DP_Config->currency_show_mode == "short_name_after")
-		{
-			?>
-			sum_total = '<font class=\"price\">'+sum_total+'</font> <font class=\"currency\"><?php echo $currency_indicator; ?></font>';
-			<?php
-		}
-		?>
-		// ----------------------------------------------
-		
-        //Обновление корзины снизу
-        if(typeof updateCartInfo == 'function') {
-            updateCartInfo();
-        }
-        
-        // ----------------------------------------------
-        
-		//Обработка модуля корзины - в случае наличия: (Для старых шаблонов)
-		var cart_module_positions = document.getElementById("cart_module_positions");
-		if(cart_module_positions != undefined)
-		{
-			cart_module_positions.innerHTML = "<b>Товаров в корзине</b> " + cart_records.length;
-		}
-		var cart_module_sum = document.getElementById("cart_module_sum");
-		if(cart_module_sum != undefined)
-		{
-			cart_module_sum.innerHTML = "<b>На сумму</b> " + sum_total;
-		} 
-		
-		// ----------------------------------------------
-		
-		
-        //Если последний товар был удален из корзины
-        if(cart_records.length == 0)
-        {
-            document.getElementById("cart_area").innerHTML = "Корзина пуста";
-            return;
-        }
-        
-       
-		// Определим есть ли в корзине товары с изображениями и только при их наличии будем отображать колонку с картинкой товара
-		var there_is_images = false;
-		for(var i=0; i < cart_records.length; i++)
-        {
-			if( cart_records[i].image_src != '' ){
-				there_is_images = true;
-				break;
-			}
-		}
-
-		// Определим есть ли устаревшие товары в корзине
-		var old_cart_items = false;
-		for(var i=0; i < cart_records.length; i++)
-        {
-			if( cart_records[i].access == 0 ){
-				old_cart_items = true;
-				break;
-			}
-		}
-		
-		// Определим все ли позиции уорзины выбраны
-		var check_all = 'checked';
-		for(var i=0; i < cart_records.length; i++)
-        {
-			if( cart_records[i].checked_for_order == 0 ){
-				check_all = '';
-				break;
-			}
-		}
-		
-		var cart_html = "";//HTML корзины
-		
-		cart_html += '<div style="overflow: hidden; overflow-x: auto;">';
-		cart_html += '<table class="table cart_table">';
-		cart_html += 	'<tr>';
-		cart_html += 		'<th><input type="checkbox" '+check_all+' id="check_uncheck_all" onchange="on_check_uncheck_all();"/></th>';
-		
-		if(there_is_images === true){
-		cart_html += 		'<th></th>';
-		}
-		
-		cart_html += 		'<th>Производитель</th>';
-		cart_html += 		'<th>Артикул</th>';
-		cart_html += 		'<th>Наименование</th>';
-		cart_html += 		'<th>Склад</th>';
-		cart_html += 		'<th>Срок</th>';
-		cart_html += 		'<th>Цена</th>';
-		cart_html += 		'<th>Количество</th>';
-		cart_html += 		'<th>Сумма</th>';
-		cart_html += 		'<th></th>';
-		cart_html += 	'</tr>';
-		
-        for(var i=0; i < cart_records.length; i++)
-        {
-            var checked_for_order = 'checked';
-			if( cart_records[i].checked_for_order == 0 ){
-				checked_for_order = '';
-			}
-			
-			//Строки с ценами
-			var price = digit(Number(cart_records[i].price).toFixed(2));//Цена позиции
-			var price_sum = digit(Number(cart_records[i].price_sum).toFixed(2));//Сумма позиции
-			<?php
-			if($DP_Config->currency_show_mode == "sign_before")
-			{
-				?>
-				price = '<?php echo $currency_indicator; ?> '+ price;
-				price_sum = '<?php echo $currency_indicator; ?> '+ price_sum;
-				<?php
-			}
-			else if($DP_Config->currency_show_mode == "sign_after" || $DP_Config->currency_show_mode == "short_name_after")
-			{
-				?>
-				price = price +' <?php echo $currency_indicator; ?>';
-				price_sum = price_sum +' <?php echo $currency_indicator; ?>';
-				<?php
-			}
-			?>
-			
-			
-			var style_tr = '';// Стили строки позиции корзины (используется при различных доработках)
-			
-			
-			//////////////////////////////////////////////////////////////////////// - Доработка id 34
-			if(cart_records[i].access == 0){
-				style_tr = 'background:#f4f90e;';
-				price = '<s>'+price+'</s>';
-				price_sum = '<s>'+price_sum+'</s>';
-			}//////////////////////////////////////////////////////////////////////// - END Доработка id 34
-			//////////////////////////////////////////////////////////////////////// - Доработка id О.К.
-			if(cart_records[i].is_update == 3) {
-				let update_price = cart_records[i].update_price;
-				let update_exist = cart_records[i].update_exist;
-				console.log('update_price', update_price);
-				console.log('update_exist', update_exist);
-				console.log('count_need', cart_records[i].t2_exist);
-				style_tr = 'background:linear-gradient(90deg, rgba(84,232,108,1) 40%, rgba(103,191,255,1) 60%);';
-				price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Старая цена - ' + update_price + ', Требовалось - ' + update_exist + '" style="position:relative;" class="fa fa-question-circle"></i>';
-			} else {
-				if(cart_records[i].is_update == 1){
-					let update_price = cart_records[i].update_price;
-					console.log('update_price', update_price);
-					style_tr = 'background:#54e86c;';
-					price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Старая цена - ' + update_price + '" style="position:relative;" class="fa fa-question-circle"></i>';
-				}
-				if(cart_records[i].is_update == 2){
-				let update_exist = cart_records[i].update_exist;
-				// if(+cart_records[i].count_need > +cart_records[i].t2_exist) {
-				// 	cart_records[i].count_need = cart_records[i].t2_exist;
-				// }
-				console.log('update_exist', update_exist);
-				console.log('count_need', cart_records[i].t2_exist);
-				style_tr = 'background:#67bfff;';
-				price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Требовалось - ' + update_exist + '" style="position:relative;" class="fa fa-question-circle"></i>';
-				}
-			}
-			//////////////////////////////////////////////////////////////////////// - END Доработка id О.К.
-			//////////////////////////////////////////////////////////////////////// - END Доработка id 34
-
-			
-			cart_html += '<tr style="'+style_tr+'">';
-			
-				cart_html += '<td>';
-					cart_html += '<input type="checkbox" '+checked_for_order+' onclick="check_for_order('+cart_records[i].id+');">';
-				cart_html += '</td>';
-				
-				
-				if(there_is_images === true){
-				if(cart_records[i].image_src !== ''){
-				cart_html += '<td>';
-                    cart_html += '<img style="max-width:50px; max-height:70px;" src="'+cart_records[i].image_src+'"/>';
-                cart_html += '</td>';
-				}else{
-				cart_html += '<td>';
-					cart_html += '';
-				cart_html += '</td>';
-				}
-				}
-			
-			
-                cart_html += '<td style="font-weight: bold;">';
-                    cart_html += cart_records[i].manufacturer;
-                cart_html += '</td>';
-                
-				
-				cart_html += '<td style="font-weight: bold;">';
-                    cart_html += cart_records[i].article;
-                cart_html += '</td>';
-				
-				
-				cart_html += '<td style="white-space: normal; line-height: 1em; width: 100%; min-width: 200px;">';
-                    cart_html += cart_records[i].name;
-                cart_html += '</td>';
-				
-				cart_html += '<td style="font-weight: bold;">';
-                    cart_html += cart_records[i].storage_caption;
-                cart_html += '</td>';
-				
-				console.log(cart_records[i]);
-				
-				cart_html += '<td>';
-
-				// Проверяем есть ли данные о доставке
-				if (cart_records[i].delivery_start || cart_records[i].delivery_end) {
-					// Форматируем время доставки
-					const deliveryHtml = formatDelivery(
-						parseInt(cart_records[i].delivery_start),
-						parseInt(cart_records[i].delivery_end)
-					);
-					
-					if (deliveryHtml) {
-						cart_html += deliveryHtml;
-					} else {
-						cart_html += cart_records[i].time_to_exe || '';
-					}
-				} else {
-					// Если нет данных о доставке, показываем time_to_exe
-					cart_html += cart_records[i].time_to_exe || '';
-				}
-
-				cart_html += '</td>';
-				
-				
-				cart_html += '<td>';
-                    cart_html += price;
-                cart_html += '</td>';
-				
-				
-				cart_html += '<td><table style="margin:auto;"><tr>';
-                    cart_html += '<td><a style="display: inline-block; background: #f5f5f5; font-weight: bold; width: 22px; height: 25px; line-height: 24px; text-decoration: none; text-align: center; border-radius: 3px 0px 0px 3px; border: 1px solid #999; border-right: 0;" onclick="minusCountNeed('+cart_records[i].id+');" href="javascript:void(0);"><span style="position: relative; top: -2px;">-</span></a></td>';
-                    cart_html += '<td><input style="width: 40px; height: 25px; line-height: 24px; text-align: center; border: 1px solid #999; border-radius: unset; box-shadow: none;" type="text" value="'+cart_records[i].count_need+'" onkeyup="onKeyUpCountNeed('+cart_records[i].id+');" id="count_need_'+cart_records[i].id+'"/></td>';
-                    cart_html += '<td><a style="display: inline-block; background: #f5f5f5; font-weight: bold; width: 22px; height: 25px; line-height: 24px; text-decoration: none; text-align: center; border-radius: 0px 3px 3px 0px; border: 1px solid #999; border-left: 0;" onclick="plusCountNeed('+cart_records[i].id+');" href="javascript:void(0);"><span>+</span></a></td>';
-                cart_html += '</tr></table></td>';
-				
-				
-				cart_html += '<td style="font-weight: bold;">';
-                    cart_html += price_sum;
-                cart_html += '</td>';
-				
-				
-				cart_html += '<td style="text-align: right;">';
-					
-					cart_html += '<a style="margin-right:5px;" href="javascript:void(0);" onclick="RefreschRecord('+cart_records[i].id+');" title="Перезаказать"><i style="font-size: 20px; position: relative; top: -1px;" class="fa fa-refresh" aria-hidden="true"></i></a>';
-					
-					cart_html += '<a style="margin-right:5px;" href="javascript:void(0);" title="Добавить в блокнот" onclick="show_add_bloknot('+cart_records[i].id+');"><i style="font-size: 18px; position: relative; top: -2px;" class="fa fa-car"></i></a>';
-					
-					cart_html += '<a href="javascript:void(0);" onclick="deleteRecord('+cart_records[i].id+');" title="Удалить"><i style="font-size: 25px;" class="fa fa-times" aria-hidden="true"></i></a>';
-                
-				cart_html += '</td>';
-				
-            cart_html += '</tr>';
-        }
-		
-        cart_html += '</table>';
-        cart_html += '</div>';
-		
-		
-		//////////////////////////////////////////////////////////////////////// - Доработка id 34
-			var flag_no_access_exist = false;
-			for(var i=0; i < cart_records.length; i++)
-			{
-				if(cart_records[i].access == 0){
-					flag_no_access_exist = true;
-					break;
-				}
-			}
-			if(flag_no_access_exist === true){
-				cart_html += '<p style="background: #f4f90e; padding: 10px; margin: 10px 0px; border-radius: 5px; border: 1px solid #ddd;"><i class="fa fa-info-circle" aria-hidden="true"></i> Некоторые позиции корзины устарели. Перед оформлением заказа выделенные позиции необходимо перезаказать - нажмите <i class="fa fa-refresh" aria-hidden="true"></i></p>';
-			}
-		//////////////////////////////////////////////////////////////////////// - END Доработка id 34
-		
-		
-					//////////////////////////////////////////////////////////////////////// - Доработка id 34
-					var flag_no_price_update = false;
-			for(var i=0; i < cart_records.length; i++)
-			{
-				if(cart_records[i].is_update == 1 || cart_records[i].is_update == 3){
-					flag_no_price_update = true;
-					break;
-				}
-			}
-			if(flag_no_price_update === true){
-				cart_html += '<p style="background: #54e86c; padding: 10px; margin: 10px 0px; border-radius: 5px; border: 1px solid #ddd;"><i class="fa fa-info-circle" aria-hidden="true"></i> Некоторые позиции корзины обновились. Чтобы узнать прежнюю стоимость кликните на вопрос рядом с ценой. </p>';
-			}
-			var flag_no_exist_update = false;
-			for(var i=0; i < cart_records.length; i++)
-			{
-				if(cart_records[i].is_update == 2 || cart_records[i].is_update == 3){
-					flag_no_exist_update = true;
-					break;
-				}
-			}
-			if(flag_no_exist_update === true){
-				cart_html += '<p style="background: #67bfff; padding: 10px; margin: 10px 0px; border-radius: 5px; border: 1px solid #ddd;"><i class="fa fa-info-circle" aria-hidden="true"></i> Для некоторых позиций обновилось наличие товара у поставщика. </p>';
-			}
-
-			<?php
-	      $order_update_html = '';
-	      
-	      if((int)$user_id > 0) {
-	          $order_update_html = '<span style="display:none;" id="confirm_loader">Подождите... <img src="/content/files/images/ajax-loader-transparent.gif" /></span> <a id="update_items_btn" class="btn btn-ar btn-warning" onClick="update_order(cart_records, ' .$user_id. ');" href="javascript:void(0);" title="Обновить все устаревшие позиции в корзине">Обновить позиции</a>';
-	      }
-  		?>
-
-		cart_html += '<p style="background: #eee; padding: 10px; margin: 10px 0px; border-radius: 5px; border: 1px solid #ddd;"><i class="fa fa-info-circle" aria-hidden="true"></i> Стоимость заказа в корзине указана на условиях самовывоза. Для выполнения заказа может потребоваться предоплата.</p>';
-		
-		
-		<?php
-		//Выводим кнопки для печати документов
-		$print_docs_buttons = "";
-		$print_docs_query = $db_link->prepare("SELECT * FROM `shop_print_docs` WHERE `name` IN('user_cart') ORDER BY `id` ASC;");
-		$print_docs_query->execute();
-		while( $print_doc = $print_docs_query->fetch() )
-		{
-			$print_doc["parameters_values"] = json_decode($print_doc["parameters_values"], true);
-			
-			
-			if( isset( $DP_Config->wholesaler ) )
-			{
-				$doc_query_2 = $db_link->prepare("SELECT * FROM `shop_print_docs_wholesaler` WHERE `doc_name` = ? AND `office_id` = ( SELECT `office_id` FROM `shop_orders` WHERE `id` = ? ) ;");
-				$doc_query_2->execute( array( $print_doc["name"] , $order_id ) );
-				$doc_record_2 = $doc_query_2->fetch();
-				if( $doc_record_2 != false )
-				{
-					$print_doc["parameters_values"] = json_decode($doc_record_2["parameters_values"], true);
-				}
-			}
-			
-			
-			if( ! DP_User::isAdmin() )
-			{
-				if( (int)$print_doc["parameters_values"]["button_visible_for_user"] != 1 )
-				{
-					continue;
-				}
-			}
-			
-			if((int) $print_doc["parameters_values"]["button_visible_for_pages"] === 1)
-			{
-				if( $print_docs_buttons != "" )
-				{
-					$print_docs_buttons = $print_docs_buttons." ";
-				}
-				if($print_doc['name'] == 'user_cart'){
-					$print_docs_buttons = $print_docs_buttons."<a class=\"btn btn-ar btn-primary\" href=\"/content/shop/print_docs/service/print.php?doc_name=".$print_doc["name"]."&new=1&csrf_guard_key=".$user_session["csrf_guard_key"]."\" target=\"_blank\"><i class=\"fa fa-print\"></i>Печать корзины</a> ";
-					continue;
-				}
-				$print_docs_buttons = $print_docs_buttons."<a class=\"btn btn-ar btn-primary\" href=\"/content/shop/print_docs/service/print.php?doc_name=".$print_doc["name"]."&csrf_guard_key=".$user_session["csrf_guard_key"]."\" target=\"_blank\"><i class=\"fa fa-print\"></i> ".$print_doc["caption"]."</a>";
-			}
-		}
-		if( $print_docs_buttons != "" )
-		{
-			if( 1 )
-			{
-			?>
-			if( sum_total_num > 0 )
-			{
-				cart_html += '<div><?php echo $print_docs_buttons; ?></div>';
-			}
-			<?php
-			}
-		}
-		?>
-		
-		
-        cart_html += '<div style="padding-top: 10px; text-align: right; font-size: 18px; font-weight: bold;"><span style="font-size: 14px; font-weight: normal;">Итого:</span> '+sum_total+'</div>';
-        
-        
+    <?php
+    if ($DP_Config->currency_show_mode == "sign_before") {
+        ?>
+        sum_total = '<span class="currency"><?php echo $currency_indicator; ?></span> <span class="price">' + sum_total + '</span>';
         <?php
-        //В зависимости от того, зарегистрирован ли пользователь - указываем ссылку для кнопки "Оформить заказ"
-        if($user_id > 0)
-        {
-            $order_link = "/shop/checkout/how_get";//Сразу на страницу выбора способа получения
+    } else if ($DP_Config->currency_show_mode == "sign_after" || $DP_Config->currency_show_mode == "short_name_after") {
+        ?>
+        sum_total = '<span class="price">' + sum_total + '</span> <span class="currency"><?php echo $currency_indicator; ?></span>';
+        <?php
+    }
+    ?>
+
+    // Обновление корзины снизу
+    if (typeof updateCartInfo == 'function') {
+        updateCartInfo();
+    }
+
+    // Обработка модуля корзины (для старых шаблонов)
+    var cart_module_positions = document.getElementById("cart_module_positions");
+    if (cart_module_positions != undefined) {
+        cart_module_positions.innerHTML = "<b>Товаров в корзине</b> " + cart_records.length;
+    }
+    var cart_module_sum = document.getElementById("cart_module_sum");
+    if (cart_module_sum != undefined) {
+        cart_module_sum.innerHTML = "<b>На сумму</b> " + sum_total;
+    }
+
+    if (cart_records.length == 0) {
+        document.getElementById("cart_area").innerHTML = "Корзина пуста";
+        return;
+    }
+
+    // Определим есть ли изображения
+    var there_is_images = false;
+    for (var i = 0; i < cart_records.length; i++) {
+        if (cart_records[i].image_src != '') {
+            there_is_images = true;
+            break;
         }
-        else
-        {
-            $order_link = "/shop/checkout/login_offer";//Предложить авторизацию
+    }
+
+    // Устаревшие товары
+    var old_cart_items = false;
+    for (var i = 0; i < cart_records.length; i++) {
+        if (cart_records[i].access == 0) {
+            old_cart_items = true;
+            break;
+        }
+    }
+
+    // Все ли выбраны
+    var check_all = 'checked';
+    for (var i = 0; i < cart_records.length; i++) {
+        if (cart_records[i].checked_for_order == 0) {
+            check_all = '';
+            break;
+        }
+    }
+
+    var cart_html = "";
+    var rowClass = there_is_images ? 'has-image' : 'no-image';
+
+    // Мобильный хедер (Выделить всё)
+    cart_html += '<div class="cart-mobile-header">';
+    cart_html += '  <input type="checkbox" ' + check_all + ' id="check_uncheck_all_mobile" onchange="on_check_uncheck_all_mobile();"/>';
+    cart_html += '  <label for="check_uncheck_all_mobile">Выделить всё</label>';
+    cart_html += '</div>';
+
+    // ---- Заголовок (десктоп) ----
+    cart_html += '<div class="cart-grid">';
+    cart_html += '<div class="cart-row cart-header ' + rowClass + '">';
+    cart_html += '  <div class="cart-col cart-col-checkbox"><input type="checkbox" ' + check_all + ' id="check_uncheck_all" onchange="on_check_uncheck_all();"/></div>';
+    if (there_is_images) {
+        cart_html += '  <div class="cart-col cart-col-image"></div>';
+    }
+    // Вместо трёх колонок – одна "Товар"
+    cart_html += '  <div class="cart-col cart-col-product">Товар</div>';
+    cart_html += '  <div class="cart-col cart-col-storage">Склад</div>';
+    cart_html += '  <div class="cart-col cart-col-term">Срок</div>';
+    cart_html += '  <div class="cart-col cart-col-price">Цена</div>';
+    cart_html += '  <div class="cart-col cart-col-quantity">Кол-во</div>';
+    cart_html += '  <div class="cart-col cart-col-sum">Сумма</div>';
+    cart_html += '  <div class="cart-col cart-col-actions">Действия</div>';
+    cart_html += '</div>';
+
+    // ---- Товары ----
+    for (var i = 0; i < cart_records.length; i++) {
+        var checked_for_order = (cart_records[i].checked_for_order == 1) ? 'checked' : '';
+
+        var price = digit(Number(cart_records[i].price).toFixed(2));
+        var price_sum = digit(Number(cart_records[i].price_sum).toFixed(2));
+        <?php
+        if ($DP_Config->currency_show_mode == "sign_before") {
+            ?>
+            price = '<?php echo $currency_indicator; ?> ' + price;
+            price_sum = '<?php echo $currency_indicator; ?> ' + price_sum;
+            <?php
+        } else if ($DP_Config->currency_show_mode == "sign_after" || $DP_Config->currency_show_mode == "short_name_after") {
+            ?>
+            price = price + ' <?php echo $currency_indicator; ?>';
+            price_sum = price_sum + ' <?php echo $currency_indicator; ?>';
+            <?php
         }
         ?>
-        
-				cart_html += '<div style="text-align: right;">';
 
-				if(old_cart_items) {
-						cart_html += '<?= $order_update_html ;?>';
-				}	
+        var style_tr = '';
+        // Доработка id 34 – устаревший товар
+        if (cart_records[i].access == 0) {
+            style_tr = 'background:#fcf8e3;';
+            price = '<s>' + price + '</s>';
+            price_sum = '<s>' + price_sum + '</s>';
+        }
+        // Доработка О.К. – обновление цены/наличия
+        if (cart_records[i].is_update == 3) {
+            let update_price = cart_records[i].update_price;
+            let update_exist = cart_records[i].update_exist;
+            style_tr = 'background:linear-gradient(90deg, rgba(84,232,108,0.3) 40%, rgba(103,191,255,0.3) 60%);';
+            price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Старая цена - ' + update_price + ', требовалось - ' + update_exist + '" class="fa fa-question-circle" style="color:#0d6efd;"></i>';
+        } else {
+            if (cart_records[i].is_update == 1) {
+                let update_price = cart_records[i].update_price;
+                style_tr = 'background:#d4edda;';
+                price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Старая цена - ' + update_price + '" class="fa fa-question-circle" style="color:#0d6efd;"></i>';
+            }
+            if (cart_records[i].is_update == 2) {
+                let update_exist = cart_records[i].update_exist;
+                style_tr = 'background:#d1ecf1;';
+                price = '<span>' + price + '</span> <i data-toggle="tooltip" title="Требовалось - ' + update_exist + '" class="fa fa-question-circle" style="color:#0d6efd;"></i>';
+            }
+        }
 
-		if( sum_total_num > 0 )
-		{
-			cart_html += '<a style="margin-left:20px;" class="btn btn-ar btn-primary" href="<?php echo $order_link; ?>">Оформить заказ</a>';
-		}
-		cart_html += '</div>';
-		
-        document.getElementById("cart_area").innerHTML = cart_html;
+        cart_html += '<div class="cart-row cart-item ' + rowClass + '" style="' + style_tr + '">';
+        // Чекбокс
+        cart_html += '  <div class="cart-col cart-col-checkbox"><input type="checkbox" ' + checked_for_order + ' onclick="check_for_order(' + cart_records[i].id + ');" /></div>';
+        // Изображение
+        if (there_is_images) {
+            if (cart_records[i].image_src !== '') {
+                cart_html += '  <div class="cart-col cart-col-image"><img src="' + cart_records[i].image_src + '" alt=""/></div>';
+            } else {
+                cart_html += '  <div class="cart-col cart-col-image"></div>';
+            }
+        }
+        // Новая ячейка "Товар" – производитель + артикул (основной), наименование (подпись)
+        cart_html += '  <div class="cart-col cart-col-product">';
+        cart_html += '    <span class="product-main">' + cart_records[i].manufacturer + ' ' + cart_records[i].article + '</span>';
+        cart_html += '    <span class="product-sub">' + cart_records[i].name + '</span>';
+        cart_html += '  </div>';
+        // Склад
+        cart_html += '  <div class="cart-col cart-col-storage">' + cart_records[i].storage_caption + '</div>';
+        // Срок
+        cart_html += '  <div class="cart-col cart-col-term">';
+        if (cart_records[i].delivery_start || cart_records[i].delivery_end) {
+            const deliveryHtml = formatDelivery(
+                parseInt(cart_records[i].delivery_start),
+                parseInt(cart_records[i].delivery_end)
+            );
+            if (deliveryHtml) {
+                cart_html += deliveryHtml;
+            } else {
+                cart_html += cart_records[i].time_to_exe || '';
+            }
+        } else {
+            cart_html += cart_records[i].time_to_exe || '';
+        }
+        cart_html += '  </div>';
+        // Цена
+        cart_html += '  <div class="cart-col cart-col-price">' + price + '</div>';
+        // Количество
+        cart_html += '  <div class="cart-col cart-col-quantity">';
+        cart_html += '    <div class="qty-controls">';
+        cart_html += '      <span class="qty-btn" onclick="minusCountNeed(' + cart_records[i].id + ');">−</span>';
+        cart_html += '      <input class="qty-input" type="text" value="' + cart_records[i].count_need + '" onkeyup="onKeyUpCountNeed(' + cart_records[i].id + ');" id="count_need_' + cart_records[i].id + '"/>';
+        cart_html += '      <span class="qty-btn" onclick="plusCountNeed(' + cart_records[i].id + ');">+</span>';
+        cart_html += '    </div>';
+        cart_html += '  </div>';
+        // Сумма
+        cart_html += '  <div class="cart-col cart-col-sum">' + price_sum + '</div>';
+        // Действия
+        cart_html += '  <div class="cart-col cart-col-actions">';
+        cart_html += '    <span class="action-btn" onclick="RefreschRecord(' + cart_records[i].id + ');" title="Перезаказать"><i class="fa fa-refresh" aria-hidden="true"></i></span>';
+        cart_html += '    <span class="action-btn" onclick="show_add_bloknot(' + cart_records[i].id + ');" title="Добавить в блокнот"><i class="fa fa-car" aria-hidden="true"></i></span>';
+        cart_html += '    <span class="action-btn" onclick="deleteRecord(' + cart_records[i].id + ');" title="Удалить"><i class="fa fa-times" aria-hidden="true"></i></span>';
+        cart_html += '  </div>';
+        cart_html += '</div>';
     }
+
+    // ---- Информационные блоки (устаревшие / обновления) ----
+    var flag_no_access_exist = cart_records.some(item => item.access == 0);
+    if (flag_no_access_exist) {
+        cart_html += '<div class="cart-info-block" style="background:#fcf8e3; border-color:#faebcc;"><i class="fa fa-info-circle"></i> Некоторые позиции корзины устарели. Перед оформлением заказа выделенные позиции необходимо перезаказать – нажмите <i class="fa fa-refresh"></i></div>';
+    }
+    var flag_no_price_update = cart_records.some(item => item.is_update == 1 || item.is_update == 3);
+    if (flag_no_price_update) {
+        cart_html += '<div class="cart-info-block" style="background:#d4edda; border-color:#c3e6cb;"><i class="fa fa-info-circle"></i> Некоторые позиции корзины обновились. Чтобы узнать прежнюю стоимость, кликните на вопрос рядом с ценой.</div>';
+    }
+    var flag_no_exist_update = cart_records.some(item => item.is_update == 2 || item.is_update == 3);
+    if (flag_no_exist_update) {
+        cart_html += '<div class="cart-info-block" style="background:#d1ecf1; border-color:#bee5eb;"><i class="fa fa-info-circle"></i> Для некоторых позиций обновилось наличие товара у поставщика.</div>';
+    }
+
+    cart_html += '<div class="cart-info-block" style="background:#f8f9fa;"><i class="fa fa-info-circle"></i> Стоимость заказа в корзине указана на условиях самовывоза. Для выполнения заказа может потребоваться предоплата.</div>';
+
+    // ---- Кнопки печати ----
+    <?php
+    $print_docs_buttons = "";
+    $print_docs_query = $db_link->prepare("SELECT * FROM `shop_print_docs` WHERE `name` IN('user_cart') ORDER BY `id` ASC;");
+    $print_docs_query->execute();
+    while ($print_doc = $print_docs_query->fetch()) {
+        $print_doc["parameters_values"] = json_decode($print_doc["parameters_values"], true);
+        if (isset($DP_Config->wholesaler)) {
+            $doc_query_2 = $db_link->prepare("SELECT * FROM `shop_print_docs_wholesaler` WHERE `doc_name` = ? AND `office_id` = (SELECT `office_id` FROM `shop_orders` WHERE `id` = ?);");
+            $doc_query_2->execute(array($print_doc["name"], $order_id));
+            $doc_record_2 = $doc_query_2->fetch();
+            if ($doc_record_2 != false) {
+                $print_doc["parameters_values"] = json_decode($doc_record_2["parameters_values"], true);
+            }
+        }
+        if (!DP_User::isAdmin()) {
+            if ((int)$print_doc["parameters_values"]["button_visible_for_user"] != 1) {
+                continue;
+            }
+        }
+        if ((int)$print_doc["parameters_values"]["button_visible_for_pages"] === 1) {
+            if ($print_docs_buttons != "") $print_docs_buttons .= " ";
+            if ($print_doc['name'] == 'user_cart') {
+                $print_docs_buttons .= "<a class=\"btn btn-outline-primary btn-sm\" href=\"/content/shop/print_docs/service/print.php?doc_name=" . $print_doc["name"] . "&new=1&csrf_guard_key=" . $user_session["csrf_guard_key"] . "\" target=\"_blank\"><i class=\"fa fa-print\"></i> Печать корзины</a> ";
+                continue;
+            }
+            $print_docs_buttons .= "<a class=\"btn btn-outline-primary btn-sm\" href=\"/content/shop/print_docs/service/print.php?doc_name=" . $print_doc["name"] . "&csrf_guard_key=" . $user_session["csrf_guard_key"] . "\" target=\"_blank\"><i class=\"fa fa-print\"></i> " . $print_doc["caption"] . "</a>";
+        }
+    }
+    if ($print_docs_buttons != "") {
+        ?>
+        if (sum_total_num > 0) {
+            cart_html += '<div class="cart-actions-bottom"><?php echo $print_docs_buttons; ?></div>';
+        }
+        <?php
+    }
+    ?>
+
+    // ---- Кнопка обновления устаревших ----
+    <?php
+    $order_update_html = '';
+    if ((int)$user_id > 0) {
+        $order_update_html = '<span style="display:none;" id="confirm_loader">Подождите... <img src="/content/files/images/ajax-loader-transparent.gif" /></span> <a id="update_items_btn" class="btn btn-warning" onClick="update_order(cart_records, ' . $user_id . ');" href="javascript:void(0);" title="Обновить все устаревшие позиции в корзине">Обновить позиции</a>';
+    }
+    ?>
+
+    // ---- Итого и кнопка заказа ----
+    cart_html += '<div class="cart-total"><span class="total-label">Итого:</span> ' + sum_total + '</div>';
+    cart_html += '<div class="cart-actions-bottom">';
+    if (old_cart_items) {
+        cart_html += '<?php echo $order_update_html; ?>';
+    }
+    if (sum_total_num > 0) {
+        cart_html += '<a class="btn btn-primary" href="<?php echo $order_link; ?>">Оформить заказ</a>';
+    }
+    cart_html += '</div>';
+
+    cart_html += '</div>'; // закрываем .cart-grid
+    document.getElementById("cart_area").innerHTML = cart_html;
+
+    // Инициализация tooltips (если используется Bootstrap)
+    if (typeof jQuery !== 'undefined' && jQuery.fn.tooltip) {
+        jQuery('[data-toggle="tooltip"]').tooltip({ placement: 'top', html: true });
+    }
+}
     // --------------------------------------------------------------------------------------
 	var ajax_flag = false;
     // --------------------------------------------------------------------------------------
@@ -571,6 +807,13 @@ else
             }
         });
     }
+	
+	function on_check_uncheck_all_mobile() {
+		var state = document.getElementById("check_uncheck_all_mobile").checked;
+		document.getElementById("check_uncheck_all").checked = state;
+		on_check_uncheck_all(); // перерисовывает корзину и синхронизирует оба чекбокса
+	}
+	
     // --------------------------------------------------------------------------------------
     //Функция вычитания требуемого количества
     function minusCountNeed(cart_record_id)

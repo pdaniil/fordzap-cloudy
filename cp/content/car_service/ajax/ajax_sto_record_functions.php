@@ -595,7 +595,7 @@ function save_record() {
             }
             
             // Проверка обязательных полей для новой записи
-            if (empty($recordTable['car_id']) || $recordTable['car_id'] <= 0) {
+            if (empty($recordTable['car_id']) || $recordTable['car_id'] <= 0) {  
                 exitFunction(array(
                     "status" => 400,
                     "message" => "Для создания новой записи необходимо выбрать автомобиль"

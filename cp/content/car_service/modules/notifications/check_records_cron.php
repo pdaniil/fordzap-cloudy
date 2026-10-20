@@ -44,21 +44,23 @@ try {
     writeLog("Поиск записей от " . date('Y-m-d H:i:s', $timeFrom) . " до " . date('Y-m-d H:i:s', $timeTo));
     
     // ШАГ 1: Получаем записи, которые будут через час
-    $records_sql = "
-        SELECT 
-            r.id,
-            r.time_from,
-            r.worker_id,
-            r.user_id,
-            r.car_id,
-            r.sto_id,
-            r.mileage
-        FROM `car_service_records` r
-        WHERE r.time_from BETWEEN :time_from AND :time_to
-          AND r.is_archive = 0
-        ORDER BY r.time_from ASC
-    ";
-    
+	$records_sql = "
+		SELECT 
+			r.id,
+			r.time_from,
+			r.worker_id,
+			r.user_id,
+			r.car_id,
+			r.sto_id,
+			r.mileage
+		FROM `car_service_records` r
+		LEFT JOIN `shop_orders` o ON r.orders_ids = o.id   -- замените на реальное имя таблицы и поле связи
+		WHERE r.time_from BETWEEN :time_from AND :time_to
+		  AND r.is_archive = 0
+		  AND (o.status IS NULL OR o.status NOT IN (3,6,9))    -- если заказа нет или статус не завершён
+		ORDER BY r.time_from ASC
+	";
+
     $stmt = $db->prepare($records_sql);
     $stmt->execute([
         ':time_from' => $timeFrom,

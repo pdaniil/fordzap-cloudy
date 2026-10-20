@@ -23,7 +23,7 @@ class ABCPSAO {
 		$params_payment_methods = http_build_query( array( 'userlogin' => $this->login, 
 																'userpsw' => $this->password ));
 
-		$url_payment_methods = "http://{$this->subdomain}.public.api.abcp.ru/basket/paymentMethods?{$params_payment_methods}";
+		$url_payment_methods = "https://{$this->subdomain}.public.api.abcp.ru/basket/paymentMethods?{$params_payment_methods}";
 		
 		$ch = $this->ch;
 		
@@ -59,7 +59,7 @@ class ABCPSAO {
 		$params_shipment_offices = http_build_query( array( 'userlogin' => $this->login, 
 																'userpsw' => $this->password ));
 
-		$url_shipment_offices = "http://{$this->subdomain}.public.api.abcp.ru/basket/shipmentOffices?{$params_shipment_offices}";
+		$url_shipment_offices = "https://{$this->subdomain}.public.api.abcp.ru/basket/shipmentOffices?{$params_shipment_offices}";
 		
 		$ch = $this->ch;
 		
@@ -77,7 +77,7 @@ class ABCPSAO {
 		$params_shipment_offices = http_build_query( array( 'userlogin' => $this->login, 
 																'userpsw' => $this->password ));
 
-		$url_shipment_offices = "http://{$this->subdomain}.public.api.abcp.ru/basket/shipmentAddresses?{$params_shipment_offices}";
+		$url_shipment_offices = "https://{$this->subdomain}.public.api.abcp.ru/basket/shipmentAddresses?{$params_shipment_offices}";
 	
 		$ch = $this->ch;
 		
@@ -97,7 +97,7 @@ class ABCPSAO {
 		$params_shipment_dates = http_build_query( array( 'userlogin' => $this->login, 
 																'userpsw' => $this->password ));
 
-		$url_shipment_dates = "http://{$this->subdomain}.public.api.abcp.ru/basket/shipmentDates?{$params_shipment_dates}";
+		$url_shipment_dates = "https://{$this->subdomain}.public.api.abcp.ru/basket/shipmentDates?{$params_shipment_dates}";
 	
 		$ch = $this->ch;
 		
@@ -115,7 +115,7 @@ class ABCPSAO {
 		$this->initHandler();
 		$ch = $this->ch;
 		
-		$url_request = "http://{$this->subdomain}.public.api.abcp.ru/orders/instant";
+		$url_request = "https://{$this->subdomain}.public.api.abcp.ru/orders/instant";
 		
 		$order_data = $abcp_order->getOrderData();
 		

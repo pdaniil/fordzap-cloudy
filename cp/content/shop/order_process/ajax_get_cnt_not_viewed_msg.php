@@ -39,14 +39,15 @@ if( ! DP_User::isAdmin())
 	exit(json_encode($result));//Вообще не является администратором бэкенда
 }
 
+$admin_id = DP_User::getAdminId();
 
 if(isset($_GET['returns'])){
-	$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders_messages` WHERE `read` = 0 AND `is_customer` = 1 AND `return_id` > 0;");// Считаем сообщения по возвратам
+	$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders_messages` WHERE `read` = 0 AND `is_customer` = 1 AND `return_id` > 0 and `order_id` IN (SELECT `id` FROM `shop_orders` WHERE office_id IN (SELECT `id` FROM `shop_offices`  WHERE users LIKE CONCAT('%\"', :user_id, '\"%') ));");// Считаем сообщения по возвратам
 }else{
-	$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders_messages` WHERE `read` = 0 AND `is_customer` = 1 AND `order_id` > 0;");// Считаем сообщения по заказам
+	$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders_messages` WHERE `read` = 0 AND `is_customer` = 1 AND `order_id` > 0 and `order_id` IN (SELECT `id` FROM `shop_orders` WHERE office_id IN (SELECT `id` FROM `shop_offices`  WHERE users LIKE CONCAT('%\"', :user_id, '\"%') ));");// Считаем сообщения по заказам
 }
 
-$not_viewed_count_query->execute();
+$not_viewed_count_query->execute([':user_id' => $admin_id]);
 $not_viewed_count_record = $not_viewed_count_query->fetch();
 
 $result["status"] = true;

@@ -10,6 +10,10 @@
 	- если узел выбран, то просто показывается модуль
 */
 defined('_ASTEXE_') or die('No access');
+
+// -------------------------------------------
+// 1. Проверяем куку – если есть, получаем данные узла
+// -------------------------------------------
 if( isset($_COOKIE["my_city"]) )
 {
 	$stmt = $db_link->prepare('SELECT * FROM `shop_geo` WHERE `id` = :id;');
@@ -20,45 +24,38 @@ if( isset($_COOKIE["my_city"]) )
 		$_COOKIE["my_city"] = null;
 	}
 }
+
+// -------------------------------------------
+// 2. Подключаем необходимые файлы и получаем дерево гео
+// -------------------------------------------
 require_once($_SERVER["DOCUMENT_ROOT"]."/content/shop/geo/dp_geo_node_record.php");
 require_once($_SERVER["DOCUMENT_ROOT"]."/content/shop/geo/get_geo_tree.php");
 //Для работы с пользователем
 require_once( $_SERVER['DOCUMENT_ROOT']."/content/users/dp_user.php" );
 $user_session = DP_User::getUserSession();
-?>
-<script>
-//Устновка своего города
-function set_my_city(id)
+
+// -------------------------------------------
+// 3. Получаем первый город (для использования по умолчанию)
+// -------------------------------------------
+$stmt = $db_link->query('SELECT `id`, `value` FROM `shop_geo` WHERE  `count` = 0 ORDER BY `id` LIMIT 1');
+$first_geo = $stmt->fetch(PDO::FETCH_ASSOC);
+$first_geo_id   = $first_geo ? $first_geo['id'] : 0;
+$first_geo_name = $first_geo ? $first_geo['value'] : '';
+
+// -------------------------------------------
+// 4. Получаем общее количество городов
+// -------------------------------------------
+$stmt = $db_link->query('SELECT COUNT(*) FROM `shop_geo`');
+$total_geo = $stmt->fetchColumn();
+
+// -------------------------------------------
+// 5. Если городов больше одного – выводим модуль выбора
+// -------------------------------------------
+if( $total_geo > 1 )
 {
-    //Увеличиваем наличие на сервере и только после этого отображаем
-    jQuery.ajax({
-        type: "POST",
-        async: false, //Запрос синхронный
-        url: "/modules/shop/geo/ajax_set_my_city.php",
-        dataType: "json",//Тип возвращаемого значения
-        data: "geo_id="+id+"&csrf_guard_key=<?php echo $user_session["csrf_guard_key"]; ?>",
-        success: function(answer)
-        {
-            if(answer == 1)
-            {
-                location.reload();
-            }
-        }
-    });
-}
-</script>
-<?php
-//Если географический узел не единственный - выводим модуль выбора города
-$stmt = $db_link->prepare('SELECT COUNT(*) FROM `shop_geo`;');
-$stmt->execute();
-if( $stmt->fetchColumn() > 1 )
-{
-	//Гео-узлов больше одного. Получаем первый гео-узел
-	$stmt = $db_link->prepare('SELECT `id`, `value` FROM `shop_geo`;');
-	$stmt->execute();
-	$first_node = $stmt->fetch();
-    //Выставляем текущий город
-    $city_name = $first_node["value"];//Первый узел из списка
+	// Гео-узлов больше одного.
+	// Выставляем текущий город (по умолчанию – первый)
+	$city_name = $first_geo_name;
 	?>
     <!-- Start Модальное окно -->
         <div style="display:none" id="modal_content_div">
@@ -100,80 +97,88 @@ if( $stmt->fetchColumn() > 1 )
         </script>
     <!-- End Модальное окно -->
 	<?php
-    //Если есть установленные куки
-    if( isset($_COOKIE["my_city"]) )
-    {
+	// -------------------------------------------
+	// Если кука установлена – показываем её название
+	// -------------------------------------------
+	if( isset($_COOKIE["my_city"]) )
+	{
 		$stmt = $db_link->prepare('SELECT `value` FROM `shop_geo` WHERE `id` = :id;');
 		$stmt->bindValue(':id', $_COOKIE["my_city"]);
 		$stmt->execute();
 		$city_name_record = $stmt->fetch(PDO::FETCH_ASSOC);
-        if( $city_name_record != false )
-        {
-            $city_name = $city_name_record["value"];
-			?>
-			<div class="customer_city" id="customer_city" onclick="openPopupWindow_CityList();">
-				<i style="font-size: 1.2em;" class="fa fa-map-marker" aria-hidden="true"></i> <span><?php echo $city_name; ?></span>
-			</div>
-			<?php
-        }
-    }
-    else//куки не установлены - выдаем окно выбора города
-    {
-        ?>
-				<div class="customer_city" id="customer_city" onclick="openPopupWindow_CityList();">
-					<i style="font-size: 1.2em;" class="fa fa-map-marker" aria-hidden="true"></i> <span></span>
-				</div>
-				
-        <script>
-					          function navigatorGeo() {
-              console.log('navigator');
-             if (navigator.geolocation) {
-                  navigator.geolocation.getCurrentPosition(savePosition);
-              } else {
-                  savePosition([]);
-              }
-          }
-          function savePosition(position) {
-            let coords = {};
-            if(position && position.coords) {
-                coords = {
-                'latitude' : position.coords.latitude,
-                'longitude' : position.coords.longitude
-                };
-            }
-            jQuery.ajax({
-                type: "POST",
-                async: false,
-                url: "/plugins/access_control/geo.php",
-                dataType: "json", //Тип возвращаемого значения
-                data: 'position=' + JSON.stringify(coords),
-                success: function(answer) {
-                    if(answer.result == true) {
-                        jQuery('#customer_city span').text(answer.geo_name);
-                    }
-                }
-            });
-          }
-          navigatorGeo();
-					//openPopupWindow_CityList();
-        </script>
-        <?php
-    }
-}//~if(mysqli_num_rows($geo_count) > 1)
-else//Если единственный географический узел - ставим его в куки
-{
-	if($_COOKIE["my_city"] == NULL)
+		if( $city_name_record != false )
+		{
+			$city_name = $city_name_record["value"];
+		}
+		?>
+		<div class="customer_city" id="customer_city" onclick="openPopupWindow_CityList();">
+			<i style="font-size: 1.2em;" class="fa fa-map-marker" aria-hidden="true"></i> <span><?php echo htmlspecialchars($city_name); ?></span>
+		</div>
+		<?php
+	}
+	else
+	// -------------------------------------------
+	// Куки не установлены – автоматически ставим первый город
+	// -------------------------------------------
 	{
-		$single_node = mysqli_fetch_array($geo_count);
+		?>
+		<div class="customer_city" id="customer_city" onclick="openPopupWindow_CityList();">
+			<i style="font-size: 1.2em;" class="fa fa-map-marker" aria-hidden="true"></i>
+			<span><?php echo htmlspecialchars($first_geo_name); ?></span>
+		</div>
+		<script>
+			// Автоматически устанавливаем первый город (перезагрузит страницу)
+			set_my_city(<?php echo (int)$first_geo_id; ?>);
+		</script>
+		<?php
+	}
+} //~if($total_geo > 1)
+else
+// -------------------------------------------
+// Если единственный географический узел – ставим его автоматически
+// -------------------------------------------
+{
+	if (empty($_COOKIE["my_city"]))
+	{
+		// Используем уже полученный первый (и единственный) город
 		?>
 		<script>
-			set_my_city(<?php echo $single_node["id"]; ?>);
+			set_my_city(<?php echo (int)$first_geo_id; ?>);
 		</script>
 		<?php
 	}
 }
-// *****************************************************************************************************
-//Рекурсивная функция для вывода географических узлов
+
+// -------------------------------------------
+// 6. JavaScript-функция для установки города (AJAX)
+// -------------------------------------------
+?>
+<script>
+//Устновка своего города
+function set_my_city(id)
+{
+    //Увеличиваем наличие на сервере и только после этого отображаем
+    jQuery.ajax({
+        type: "POST",
+        async: false, //Запрос синхронный
+        url: "/modules/shop/geo/ajax_set_my_city.php",
+        dataType: "json",//Тип возвращаемого значения
+        data: "geo_id="+id+"&csrf_guard_key=<?php echo $user_session["csrf_guard_key"]; ?>",
+        success: function(answer)
+        {
+            if(answer == 1)
+            {
+                location.reload();
+            }
+        }
+    });
+}
+</script>
+<?php
+
+// -------------------------------------------
+// 7. Рекурсивная функция для вывода географических узлов
+// -------------------------------------------
 function printGeoNodes($geo_tree_dump)
 {
     for($i=0; $i < count($geo_tree_dump); $i++)

@@ -30,7 +30,7 @@ class abcp_enclosure
 										'number'  => $article_reqeust, 
 										'useOnlineStocks' => $use_online ) );
 	
-		$url_request = "http://{$subdomain}.public.api.abcp.ru/search/brands?{$params_query}";
+		$url_request = "https://{$subdomain}.public.api.abcp.ru/search/brands?{$params_query}";
 		
 		$ch = curl_init();
 		curl_setopt( $ch, CURLOPT_HEADER, false );

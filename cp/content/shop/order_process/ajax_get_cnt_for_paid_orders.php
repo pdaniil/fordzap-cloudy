@@ -38,10 +38,10 @@ if( ! DP_User::isAdmin())
 	$result["code"] = 501;
 	exit(json_encode($result));//Вообще не является администратором бэкенда
 }
+$admin_id = DP_User::getAdminId();
 
-
-$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders` WHERE `status` IN(SELECT `id` FROM `shop_orders_statuses_ref` WHERE `for_paid` = 1);");
-$not_viewed_count_query->execute();
+$not_viewed_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders` WHERE `status` IN(SELECT `id` FROM `shop_orders_statuses_ref` WHERE `for_paid` = 1) and `office_id` IN (SELECT `id` FROM `shop_offices` WHERE users LIKE CONCAT('%\"', :user_id, '\"%'))");
+$not_viewed_count_query->execute([':user_id' => $admin_id]);
 $not_viewed_count_record = $not_viewed_count_query->fetch();
 
 $result["status"] = true;

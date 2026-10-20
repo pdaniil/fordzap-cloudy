@@ -13,7 +13,7 @@ $subdomain = $connection_options["subdomain"];
 $auth_params = http_build_query( array( 'userlogin' => $login, 
 											'userpsw' => $password ));
 											
-$url_request = "http://{$subdomain}.public.api.abcp.ru/orders/list?{$auth_params}";
+$url_request = "https://{$subdomain}.public.api.abcp.ru/orders/list?{$auth_params}";
 
 $orderIds = array();
 

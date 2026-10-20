@@ -83,6 +83,28 @@
 				</div>
 			</div>
 			<div class="hr-line-dashed col-lg-12"></div>
+
+			<!-- ============ ИЗОБРАЖЕНИЕ ============ -->
+			<div class="form-group">
+				<label class="col-lg-6 control-label">Изображение</label>
+				<div class="col-lg-6">
+					<div id="personal_image_preview_wrap" style="<?= !empty($service_personal_data["image"]) ? '' : 'display:none;'; ?>margin-bottom:10px;">
+						<img id="personal_image_preview"
+						     src="<?= htmlspecialchars($service_personal_data["image"], ENT_QUOTES); ?>"
+						     style="max-width:220px;max-height:220px;display:block;margin-bottom:8px;border:1px solid #ddd;padding:3px;background:#fff;">
+						<button type="button" class="btn btn-danger btn-xs" onclick="removePersonalImage();">Удалить изображение</button>
+					</div>
+
+					<input type="file" id="personal_image_file" name="personal_image_file"
+					       accept="image/*" onchange="previewPersonalImage(this);">
+
+					<!-- флаг «удалить текущее изображение на сервере» -->
+					<input type="hidden" id="personal_image_delete" value="0">
+				</div>
+			</div>
+			<div class="hr-line-dashed col-lg-12"></div>
+			<!-- ============ /ИЗОБРАЖЕНИЕ ============ -->
+
 		</div>
 	</div>
 </div>

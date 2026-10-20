@@ -38,10 +38,10 @@ if( ! DP_User::isAdmin())
 	$result["code"] = 501;
 	exit(json_encode($result));//Вообще не является администратором бэкенда
 }
+$admin_id = DP_User::getAdminId();
 
-
-$orders_with_canceled_items_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders` WHERE `flag_canceled_items` = 1;");
-$orders_with_canceled_items_count_query->execute();
+$orders_with_canceled_items_count_query = $db_link->prepare("SELECT COUNT(*) AS 'count' FROM `shop_orders` WHERE `flag_canceled_items` = 1 and `office_id` IN (SELECT `id` FROM `shop_offices` WHERE users LIKE CONCAT('%\"', :user_id, '\"%'))");
+$orders_with_canceled_items_count_query->execute([':user_id' => $admin_id]);
 $orders_with_canceled_items_count_record = $orders_with_canceled_items_count_query->fetch();
 
 $result["status"] = true;

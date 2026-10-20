@@ -57,7 +57,7 @@ foreach ($car_services_arr as $car_service) {
             $select_service_info->execute([(int)$car_service["id"], $childId]);
             $info = $select_service_info->fetch(PDO::FETCH_ASSOC) ?: [
                 "price" => null, "caption" => null, "stickers" => null,
-                "recommendation_block" => 0, "worker_price" => 0, "active" => 0
+                "recommendation_block" => 0, "worker_price" => 0, "active" => 1
             ];
 
             $price = is_null($info["price"]) ? null : (float)$info["price"];
@@ -74,7 +74,7 @@ foreach ($car_services_arr as $car_service) {
                 "stickers"            => $stickers_ids, // массив ID
                 "recommendation_block"=> (int)($info["recommendation_block"] ?? 0),
                 "worker_price"        => (int)($info["worker_price"] ?? 0),
-                "active"              => (int)($info["active"] ?? 0),
+                "active"              => (int) 1,
             ];
         }
     }
@@ -162,7 +162,7 @@ foreach ($services_arr as $sto_id => $parents) {
                 "stickers" => $s["stickers"],
                 "recommendation_block" => $s["recommendation_block"],
                 "worker_price" => $s["worker_price"],
-                "active" => $s["active"]
+                "active" => (int) 1
             ];
         }
         $js_services_data[$sto_id][] = $group;

@@ -224,7 +224,7 @@ foreach ($work_records as $record) {
         $total_accrued += $record_worker_amount;
         
         $worker_data['work_records'][] = [
-            'date' => $record["time"],
+            'date' => getOrderEndDate($record["orders_ids"]) ? getOrderEndDate($record["orders_ids"]) : strtotime($record["time"]),
             'order_id' => $record["orders_ids"],
             'price' => $record_total_price,
             'worker_amount' => $record_worker_amount,
@@ -236,6 +236,18 @@ foreach ($work_records as $record) {
     }
 }
 
+function getOrderEndDate($order_id) {
+	global $db_link;
+	
+	$sql = $db_link->prepare("SELECT `time` FROM `shop_orders_logs` WHERE `order_id` = ? AND `text` = 'Заказу присвоен статус <b>Завершен</b>'");
+	$sql->execute([$order_id]);
+	
+	$res = $sql->fetch(PDO::FETCH_ASSOC);
+	
+	if ($res["time"] > 0) return $res["time"]; 
+	else return false;
+}
+
 // Обрабатываем выплаты
 $total_paid = 0;
 foreach ($salary_payments as $payment) {
@@ -244,7 +256,7 @@ foreach ($salary_payments as $payment) {
     $total_paid += $payment["salary"];
     
     $worker_data['salary_payments'][] = [
-        'date' => $payment["time"],
+        'date' => strtotime($payment["time"]),
         'salary' => $payment["salary"],
         'type' => 'payment'
     ];
@@ -261,7 +273,7 @@ foreach ($worker_data['salary_payments'] as $payment) {
 
 // Сортируем по дате (новые сверху)
 usort($bill_info, function($a, $b) {
-    return strtotime($b['date']) - strtotime($a['date']);
+    return $b['date'] - $a['date'];
 });
 
 // Текущий баланс (ЗА ВСЁ ВРЕМЯ всегда)
@@ -1193,7 +1205,7 @@ $current_balance = $total_accrued_all_time - $total_paid_all_time;
                         <!-- Дата -->
                         <div class="car_service_worker_date">
                             <i class="far fa-calendar"></i>
-                            <?=date('d.m.Y', strtotime($item['date']));?>
+                            <?=date('d.m.Y', $item['date']);?>
                         </div>
                         
                         <!-- Тип операции и детали -->

@@ -794,36 +794,53 @@ class ShopCart {
         document.body.style.overflow = '';
     }
 
-    async addToOrder() {
-        try {
+	async addToOrder() {
+		try {
+			const response = await fetch(this.endpoint, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+				body: new URLSearchParams({
+					action: 'add_to_order',
+					order_id: sessionStorage.getItem('cp_order_id')
+				})
+			});
 			
-            const response = await fetch(this.endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    action: 'add_to_order',
-					order_id : sessionStorage.getItem('cp_order_id')
-                })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка создания заказа');
-            
-            const data = await response.json();
-            
-           // Обработчик успешного добавления товара
+			if (!response.ok) throw new Error('Ошибка создания заказа');
+			
+			const data = await response.json();
+			
 			if (data.success) {
-				window.parent.location = window.parent.location;
+				// Проверяем, запущен ли iframe в контексте нашего функционала
+				// Для этого проверяем наличие параметра record_id в URL и наличие родительского окна с нашими элементами
+				const urlParams = new URLSearchParams(window.location.search);
+				const recordId = urlParams.get('record_id');
+				
+				
+				if (recordId) {
+					// Наш контекст: перезагружаем родителя с параметрами
+					let parentUrl = window.parent.location.href;
+					// Удаляем старые параметры record_id и tab, если есть
+					parentUrl = parentUrl.replace(/[?&]record_id=[^&]*/, '').replace(/[?&]tab=[^&]*/, '');
+					// Добавляем новые параметры
+					const separator = parentUrl.includes('?') ? '&' : '?';
+					parentUrl += separator + 'record_id=' + encodeURIComponent(recordId) + '&tab=products';
+					// Перезагружаем родительское окно с параметрами
+					window.parent.location = parentUrl;
+				} else {
+					// Не наш контекст или нет record_id – стандартное поведение
+					window.parent.location = window.parent.location;
+				}
 			} else {
-				alert(data.message || 'Ошибка при создании заказа');
+				alert(data.message || 'Ошибка при добавлении товара');
 			}
-        } catch (error) {
-            console.error('Ошибка создания заказа:', error);
-            alert('Произошла ошибка при создании заказа');
-        }
-    }
-
+		} catch (error) {
+			console.error('Ошибка добавления товара:', error);
+			alert('Произошла ошибка при добавлении товара');
+		}
+	}
+  
     continueSearch() {
         this.closeModal();
         // Здесь можно добавить логику для возврата к поиску

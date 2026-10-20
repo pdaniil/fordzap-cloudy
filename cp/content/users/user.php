@@ -44,6 +44,7 @@ if( isset($_POST["save_action"]) )
 			$email_confirmed = (int)$_POST["email_confirmed"];
 			$phone = $_POST["phone"];
 			$phone_confirmed = (int)$_POST["phone_confirmed"];
+			$allow_minus_quantity = (int)$_POST["allow_minus_quantity"];
 			//Запрещаем устанавливать флаг "Подтвержден" для пустого контакта
 			if( $email == '' )
 			{
@@ -130,7 +131,7 @@ if( isset($_POST["save_action"]) )
 			
 			//Пароль
 			$password = $_POST["password"];
-			if( ! $db_link->prepare("INSERT INTO `users` (`reg_variant`, `email`, `email_confirmed`, `phone`, `phone_confirmed`, `password`, `unlocked`, `time_registered`, `admin_created`, `auto_sao_user`) VALUES (?,?,?,?,?,?,?,?,?,?);")->execute( array( (int)$_POST["reg_variant"], $email, $email_confirmed, $phone, $phone_confirmed, md5($password.$DP_Config->secret_succession), $unlocked, time(), 1, $auto_sao_user) ) )
+			if( ! $db_link->prepare("INSERT INTO `users` (`reg_variant`, `email`, `email_confirmed`, `phone`, `phone_confirmed`, `password`, `unlocked`, `time_registered`, `admin_created`, `auto_sao_user`, `allow_minus_quantity`) VALUES (?,?,?,?,?,?,?,?,?,?,?);")->execute( array( (int)$_POST["reg_variant"], $email, $email_confirmed, $phone, $phone_confirmed, md5($password.$DP_Config->secret_succession), $unlocked, time(), 1, $auto_sao_user, $allow_minus_quantity) ) )
 			{
 				throw new Exception("Ошибка создания учетной записи пользователя");
 			}
@@ -206,6 +207,13 @@ if( isset($_POST["save_action"]) )
 			$email_confirmed = (int)$_POST["email_confirmed"];
 			$phone = $_POST["phone"];
 			$phone_confirmed = (int)$_POST["phone_confirmed"];
+			$allow_minus_quantity = (int)$_POST["allow_minus_quantity"];
+			
+			if (DP_User::getAdminId() != 1) {
+				$allow_minus_quantity = 0;
+			}
+				
+			
 			//Запрещаем устанавливать флаг "Подтвержден" для пустого контакта
 			if( $email == '' )
 			{
@@ -305,14 +313,15 @@ if( isset($_POST["save_action"]) )
 			$SQL_UPDATE .= ", `unlocked`=?";
 			$SQL_UPDATE .= ", `reg_variant`=?";
 			$SQL_UPDATE .= ", `auto_sao_user`=?";
+			$SQL_UPDATE .= ", `allow_minus_quantity`=?";
 			$SQL_UPDATE .= " WHERE `user_id` = ?";
 			if($password != "")
 			{
-				$binding_values = array( $email, $email_confirmed, $phone, $phone_confirmed, md5($password.$DP_Config->secret_succession), $unlocked, (int)$_POST["reg_variant"], $auto_sao_user, (int)$_POST["user_id"] );
+				$binding_values = array( $email, $email_confirmed, $phone, $phone_confirmed, md5($password.$DP_Config->secret_succession), $unlocked, (int)$_POST["reg_variant"], $auto_sao_user, $allow_minus_quantity, (int)$_POST["user_id"] );
 			}
 			else
 			{
-				$binding_values = array( $email, $email_confirmed, $phone, $phone_confirmed, $unlocked, (int)$_POST["reg_variant"], $auto_sao_user, (int)$_POST["user_id"] );
+				$binding_values = array( $email, $email_confirmed, $phone, $phone_confirmed, $unlocked, (int)$_POST["reg_variant"], $auto_sao_user, $allow_minus_quantity, (int)$_POST["user_id"] );
 			}
 			if( ! $db_link->prepare($SQL_UPDATE)->execute( $binding_values ) )
 			{
@@ -718,7 +727,7 @@ else//Действий нет - выводим страницу
 						E-mail
 					</label>
 					<div class="col-lg-8">
-						<input type="text" name="email" id="email" value="" class="form-control" />
+						<input type="text" name="email" id="email" value="" class="form-control" autocomplete="off" />
 					</div>
 				</div>
 				
@@ -739,7 +748,7 @@ else//Действий нет - выводим страницу
 						Телефон
 					</label>
 					<div class="col-lg-8">
-						<input type="text" name="phone" id="phone" placeholder="9005556677" value="" class="form-control" />
+						<input type="text" name="phone" id="phone" placeholder="9005556677" value="" class="form-control" autocomplete="off" />
 					</div>
 				</div>
 				
@@ -763,7 +772,7 @@ else//Действий нет - выводим страницу
 						Пароль
 					</label>
 					<div class="col-lg-6">
-						<input type="password" name="password" id="password" value="" class="form-control" placeholder="Не заполнять, если не требуется менять" />
+						<input type="password" name="password" id="password" value="" class="form-control" placeholder="Не заполнять, если не требуется менять" autocomplete="off"/>
 					</div>
 				</div>
 				
@@ -774,13 +783,22 @@ else//Действий нет - выводим страницу
 						Повтор пароля
 					</label>
 					<div class="col-lg-6">
-						<input type="password" name="password_repeat" id="password_repeat" value="" class="form-control" placeholder="Не заполнять, если не требуется менять" />
+						<input type="password" name="password_repeat" id="password_repeat" value="" class="form-control" placeholder="Не заполнять, если не требуется менять" autocomplete="off" />
 					</div>
 				</div>
 				
 				<div class="hr-line-dashed col-lg-12"></div>
 				
+				<div class="form-group" <?php if (DP_User::getAdminId() != 1) echo 'style="visibility: hidden;"'; ?>>
+					<label for="" class="col-lg-6 control-label">
+						Разрешить списание товаров
+					</label>
+					<div class="col-lg-6">
+						<input type="checkbox" name="allow_minus_quantity" id="allow_minus_quantity" class="form-control" />
+					</div>
+				</div>
 				
+				<div class="hr-line-dashed col-lg-12"></div>
 
 				
 				<!-- Блок для дополнительных полей -->
@@ -1095,6 +1113,7 @@ else//Действий нет - выводим страницу
 		<input type="hidden" name="email_confirmed" id="email_confirmed_form" value="" /><!-- Подтверждение E-mail -->
 		<input type="hidden" name="phone" id="phone_form" value="" /><!-- Телефон -->
 		<input type="hidden" name="phone_confirmed" id="phone_confirmed_form" value="" /><!-- Подтверждение телефона -->
+		<input type="hidden" name="allow_minus_quantity" id="allow_minus_quantity_form" value="" /><!-- Подтверждение телефона -->
 		<input type="hidden" name="password" id="password_form" value="" /><!-- Пароль -->
 		<input type="hidden" name="auto_sao_user" id="auto_sao_user" value="" />
     </form>
@@ -1229,6 +1248,14 @@ else//Действий нет - выводим страницу
 		{
 			phone_confirmed = 1;
 		}
+		
+		var allow_minus_quantity = 0;
+		if( document.getElementById("allow_minus_quantity").checked )
+		{
+			allow_minus_quantity = 1;
+		}
+		
+		
 		
 		email_check = false;
 		phone_check = false;
@@ -1512,6 +1539,7 @@ else//Действий нет - выводим страницу
 		document.getElementById('phone_form').value = phone;
 		document.getElementById('email_confirmed_form').value = email_confirmed;
 		document.getElementById('phone_confirmed_form').value = phone_confirmed;
+		document.getElementById('allow_minus_quantity_form').value = allow_minus_quantity;
 		document.getElementById('password_form').value = document.getElementById("password").value;
 		
 		if(document.getElementById("auto_sao_user_inp").checked){
@@ -1557,6 +1585,7 @@ else//Действий нет - выводим страницу
         $current_email_confirmed = $user_record["email_confirmed"];
         $current_phone = $user_record["phone"];
         $current_phone_confirmed = $user_record["phone_confirmed"];
+        $current_allow_minus_quantity = $user_record["allow_minus_quantity"];
         $current_unlocked = $user_record["unlocked"];
         
         
@@ -1567,6 +1596,7 @@ else//Действий нет - выводим страницу
 		var current_phone = $('<textarea />').html('<?php echo $current_phone; ?>').text();
 		var current_email_confirmed = <?php echo $current_email_confirmed; ?>;
 		var current_phone_confirmed = <?php echo $current_phone_confirmed; ?>;
+		var current_allow_minus_quantity = <?php echo $current_allow_minus_quantity; ?>;
         <?php
 		$user_profile_query = $db_link->prepare("SELECT * FROM `users_profiles` WHERE `user_id` = ?;");
 		$user_profile_query->execute( array($user_id) );
@@ -1611,6 +1641,7 @@ else//Действий нет - выводим страницу
             document.getElementById("email_confirmed").checked = current_email_confirmed;
             document.getElementById("phone").value = current_phone;
 			document.getElementById("phone_confirmed").checked = current_phone_confirmed;
+			document.getElementById("allow_minus_quantity").checked = current_allow_minus_quantity;
             
             //4. Отмечаем текущие группы
             var current_groups = <?php echo json_encode($groups); ?>;

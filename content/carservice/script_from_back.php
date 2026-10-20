@@ -1,90 +1,63 @@
 <?php ?>
 <script>  
-	function save_record() {
-		const id = "<?= $_GET['id'] > 0 ? (int)$_GET['id'] : '' ?>";
-
-		// ✅ Выбранный автосервис (radio)
-		const sto_id = document.querySelector('input[name="car_service"]:checked')?.value || '';
-
-		// ✅ Выбранное время
-		const time = document.querySelector('#time-record-display').textContent.trim();
-		const time_from = document.querySelector('#time_from')?.value || '';
-		const time_to = document.querySelector('#time_to')?.value || '';
-
-		// ✅ Данные пользователя
-		const user_json = {
-			user_id: document.querySelector('#user_id')?.value || '',
-			email: document.querySelector('#email')?.value.trim() || '',
-			phone: document.querySelector('#phone')?.value.trim() || '',
-			fio: document.querySelector('#fio')?.value.trim() || ''
-		};
-
-		// ✅ Данные авто
-		const car_json = {
-			car_id: document.querySelector('#car_id')?.value || '',
-			caption: document.querySelector('#car_id option:checked')?.dataset.caption || '',
-			model: document.querySelector('#car_model')?.value.trim() || '',
-			gos_num: document.querySelector('#car_gos_num')?.value || '',
-			vin: document.querySelector('#car_vin')?.value || '',
-			year: document.querySelector('#car_year')?.value || '',
-			mileage: document.querySelector('#car_mileage')?.value || ''
-		};
-
-		// ✅ Выбранные услуги
-		const services_arr = getSelectedServices();
-
-		// === ✅ ВАЛИДАЦИЯ ===
-		let errors = [];
-
-		// Проверка времени
-		if (!time || time === 'Выберите дату и время') {
-			errors.push('Выберите дату и время записи.');
-		}
-
-		// Проверка выбранных услуг
-		if (services_arr.length === 0) {
-			errors.push('Выберите хотя бы одну услугу.');
-		}
-
-		// Проверка данных пользователя (достаточно ФИО + один контакт)
-		if (!user_json.fio) {
-			errors.push('Укажите ФИО.');
-		}
-		if (!user_json.phone && !user_json.email) {
-			errors.push('Укажите хотя бы телефон или email.');
-		}
-
-		// Проверка модели автомобиля
-		if (!car_json.model) {
-			errors.push('Укажите модель автомобиля.');
-		}
-
-		// Если есть ошибки — показываем и выходим
-		if (errors.length > 0) {
-			alert(errors.join('\n'));
-			return;
-		}
-
-		// ✅ Формируем объект для отправки
-		const obj = {
-			tables: {
-				car_service_records: {
-					id: id,
-					sto_id: sto_id,
-					time: time,
-					time_from: time_from,
-					time_to: time_to,
-					user_json: JSON.stringify(user_json),
-					car_json: JSON.stringify(car_json),
-					status_id: 1
-				},
-				car_service_record_services: services_arr
-			}
-		};
-
-		// ✅ Отправка
-		postAjax({ action: 'save_record', json: JSON.stringify(obj) }, false, 'go_to_record_page');
+	function getElement(id) {
+		return document.querySelector(id);
 	}
+    function save_record() {
+		
+		const id = "<?=$_GET["id"] > 0 ? $_GET["id"] : "";?>";
+		const sto_id = document.querySelector('input[name="car_service"]:checked')?.value || '';
+		const post_id = -1;
+		const worker_id = -1;
+		const time = document.querySelector('#time-record-display').textContent;
+		const date = new Date(time);
+		const time_from = Math.floor(date.getTime() / 1000);
+		// Добавляем полчаса (30 минут = 1800 секунд)
+		const time_to = time_from + 1800;
+        
+		
+		const user_json = {
+			user_id : '<?=DP_User::getUserId();?>',
+			email : getElement('#user_email').value,
+			phone : getElement('#user_phone').value,
+			fio : getElement('#user_fio').value
+		};
+        
+		const car_json = {
+			car_id : getElement('#car_id').value,
+			model : getElement('#car_model').value,
+			gos_num : getElement('#car_gos_num').value,
+			vin : getElement('#car_vin').value,
+			year : getElement('#car_year').value,
+			mileage : getElement('#car_mileage').value,
+			
+		};
+		
+		
+		const services_arr = getSelectedServices();
+		
+        const orders_ids = -1;
+
+        let obj = {
+            tables : {
+				car_service_records : {
+						id : id,
+						sto_id : sto_id,
+						worker_id : worker_id,
+						post_id : post_id,
+						time : time.trim(),
+						time_from : time_from,
+						time_to : time_to,
+						car_id : car_json.car_id,
+						orders_ids : orders_ids,
+						user_id : user_json.user_id
+				},
+				car_service_record_services : services_arr
+			}
+        };
+
+        postAjax({action : 'save_record', json : JSON.stringify(obj)}, false, 'go_to_record_page');	
+    }
 
 	
 	  
@@ -139,9 +112,31 @@
 		if (answer.status != 200) {
 			alert(answer.message);
 			return false;
-			
-		}
-		else {
+		} else {
+			// Получаем ID созданной записи
+			var recordId = answer.data.id;
+
+			// Отправляем уведомление администратору (асинхронно)
+			if (recordId) {
+				$.ajax({
+					url: '/cp/content/car_service/modules/notifications/send_admin_notification.php',
+					type: 'POST',
+					data: { record_id: recordId },
+					dataType: 'json',
+					success: function(response) {
+						if (response.success) {
+							console.log('Уведомление администратору отправлено');
+						} else {
+							console.warn('Ошибка уведомления:', response.error);
+						}
+					},
+					error: function(xhr, status, error) {
+						console.error('Ошибка AJAX:', error);
+					}
+				});
+			}
+
+			// Редирект с сообщением об успехе
 			location = location + "?success_message=Запись успешно создана!";
 		}
 	}

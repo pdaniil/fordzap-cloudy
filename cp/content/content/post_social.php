@@ -117,7 +117,7 @@ function post_social($content_id)
                 $db_link->prepare("UPDATE content SET post=1 WHERE id=?")->execute(array($content_id));
                 return true;
             }else{
-                return isset($result['error']) && $result['error']['error_code'] == 5 ? 'Ошибка авторизации' : 'Не удалось создать пост';
+                return isset($result['error']) && $result['error']['error_code'] == 5 ? 'Ошибка авторизации' : 'Не удалось создать пост 5.1';
             }
         }
     }
@@ -333,7 +333,7 @@ function post_social_product($product_id, $checkPost = false)
             $db_link->prepare("UPDATE shop_catalogue_products SET post_social=1 WHERE id=?")->execute(array($product_id)); // Помечаем, чтоб продукт уже публиковался. И в дальнейшем можно только через кнопку публиковать
             return true;
         }
-        return isset($result['error']) && $result['error']['error_code'] == 5 ? 'Ошибка авторизации' : 'Не удалось создать пост';
+        return isset($result['error']) && $result['error']['error_code'] == 5 ? 'Ошибка авторизации' : 'Не удалось создать пост 5';
     }
     return false;
 }

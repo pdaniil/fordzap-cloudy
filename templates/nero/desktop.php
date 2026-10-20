@@ -509,12 +509,14 @@ if(!empty($DP_Template->data_value->message_header)){
 						<div class="menu-box-item">
 							<a title="Сравнения" href="/shop/sravneniya">
 								<svg class="menu-box-icon svg-icon"><use xlink:href="/templates/nero/img/menu-i.svg#compare-i"></use></svg>
+								<span class="badge badge-primary badge-round" id="header_compare_count"></span>
 							</a>
 						</div>
 						
 						<div class="menu-box-item">
 							<a title="Закладки" href="/shop/zakladki">
 								<svg class="menu-box-icon svg-icon"><use xlink:href="/templates/nero/img/menu-i.svg#bookmarks-i"></use></svg>
+								<span class="badge badge-primary badge-round" id="header_bookmarks_count"></span>
 							</a>
 						</div>
 						
@@ -530,7 +532,7 @@ if(!empty($DP_Template->data_value->message_header)){
 							</a>
 						</div>
 						
-						<div class="menu-box-item">
+						<div class="menu-box-item" id="shop_cart_notify_block">
 							<a title="Корзина" href="/shop/cart">
 								<svg class="menu-box-icon svg-icon"><use xlink:href="/templates/nero/img/menu-i.svg#cart-i"></use></svg>
 								<span class="" id="header_cart_items_count"></span>
@@ -574,7 +576,7 @@ if(!empty($DP_Template->data_value->message_header)){
 				
 				<a class="mobile-box-phone" href="tel:<?=str_replace(array(' ','-','(',')'),'',$customer_office_info['phone']);?>"><?=$customer_office_info['phone'];?></a>
 				
-				<button type="button" class="navbar-toggle header_fa_user_btn" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2"><i class="fa fa-user"></i></button>
+				<button id="mobile_hide_user" type="button" class="navbar-toggle header_fa_user_btn" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2"><i class="fa fa-user"></i></button>
 			
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"><i class="fa fa-bars"></i></button>
 			</div>
@@ -638,7 +640,7 @@ if(!empty($DP_Template->data_value->message_header)){
 						</form>
 					</div>
 				</td>
-				<td>
+				<td id="mobile_hide_cart">
 					<a href="/shop/cart" class="header-cart-box">
 						<i class="fa fa-shopping-cart" aria-hidden="true"></i>
 						<span class="" id="header_cart_items_count_mobile"></span>
@@ -694,6 +696,25 @@ if($DP_Content->main_flag)
 <?php
 }
 ?>
+
+<?php
+if($DP_Content->main_flag)
+{
+?>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-12">
+			<h2 class="section-title">Подбор запчастей</h2>  
+			<iframe
+			  src="https://api.fordzap.com/parts-catalogue-ui/?embed=1"
+			  style="width:100%; height:650px; border:0; border-radius:16px; overflow:hidden;"
+			  loading="lazy"
+			  referrerpolicy="no-referrer-when-downgrade"
+			></iframe>
+		</div>
+	</div>
+</div>
+<?php } ?>
 
 <?php
 if($DP_Content->main_flag)
@@ -1360,7 +1381,7 @@ if( ! $DP_Content->main_flag ){
 	</div>
   </div>
 </div> 
-<style>
+<style> 
  .calendar-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;

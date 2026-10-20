@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
 
+if (DP_User::getUserId() > 1) {
+
 include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/prepare_info.php");
 include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/prepare_user_info.php");
 include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/css.php");
@@ -68,9 +70,9 @@ include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/css.php");
 			<div class="user_wrapper">
 				<div class="user_info">
 					<input type="hidden" id="user_id" value="<?=empty($user_info_arr["user_id"]) ? "" : $user_info_arr["user_id"]?>">
-					<input type="text" placeholder="Email" class="form-control" id="email" value="<?=empty($user_info_arr["email"]) ? "" : $user_info_arr["email"]?>">
-					<input type="text" placeholder="Телефон" class="form-control" id="phone" value="<?=empty($user_info_arr["phone"]) ? "" : $user_info_arr["phone"]?>">
-					<input type="text" placeholder="ФИО" class="form-control" id="fio" value="<?=empty($user_info_arr["fio"]) ? "" : $user_info_arr["fio"]?>">
+					<input type="text" placeholder="Email" class="form-control" id="user_email" value="<?=empty($user_info_arr["email"]) ? "" : $user_info_arr["email"]?>">
+					<input type="text" placeholder="Телефон" class="form-control" id="user_phone" value="<?=empty($user_info_arr["phone"]) ? "" : $user_info_arr["phone"]?>">
+					<input type="text" placeholder="ФИО" class="form-control" id="user_fio" value="<?=empty($user_info_arr["fio"]) ? "" : $user_info_arr["fio"]?>">
 				</div> 
 				<div class="car_info">
 					<?php if (!empty($user_info_arr["cars"])) : ?>
@@ -148,7 +150,7 @@ include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/css.php");
                         $price   = $svc["price"];
                         $wp      = (int)$svc["worker_price"] === 1;
                         $stickers_html = render_stickers_html($svc["stickers"], $stickers_map);
-                        $price_text = $wp || !($price > 0) ? 'Цену рассчитает мастер' : (number_format($price, 0, ',', ' ').' ₽');
+                        $price_text = $wp || !($price > 0) ? '' : (number_format($price, 0, ',', ' ').' ₽');
                     ?>
                         <label class="reco-item">
                             <input type="checkbox"
@@ -197,7 +199,7 @@ include($_SERVER["DOCUMENT_ROOT"] . "/content/carservice/css.php");
                                 $wp      = (int)$svc["worker_price"] === 1;
                                 $active  = (int)$svc["active"] === 1;
                                 $stickers_html = render_stickers_html($svc["stickers"], $stickers_map);
-                                $price_text = $wp || !($price > 0) ? 'Цену рассчитает мастер' : (number_format($price, 0, ',', ' ').' ₽');
+                                $price_text = $wp || !($price > 0) ? '' : (number_format($price, 0, ',', ' ').' ₽');
                                 ?>
                                 <?php if ($active): ?>
                                     <label class="service-item" data-sto="<?= (int)$sto_id ?>" data-name="<?= mb_strtolower($caption) ?>">
@@ -283,3 +285,13 @@ window.onload = function () {
 	set_selected_data_cars();
 }
 </script>
+
+<?php } 
+else {
+	
+	?>
+	<h3>Для записи в автосервис необходимо авторизоваться.</h3>
+	<?php  
+}
+
+?>

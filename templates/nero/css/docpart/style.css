@@ -123,160 +123,242 @@
 	margin:0px 3px;
 }
 
-
+#all_table_products .mobile-cart-wrapper {
+    display: none;
+}
+/* Десктопная версия видна всегда */
+#all_table_products .desktop-cart-wrapper {
+    display: block;
+}
 
 
 
 /* МОБИЛЬНОЕ ОТОБРАЖЕНИЕ ДАННЫХ */
 @media screen and (max-width: 767px) {
-	.show_hide_button{
-		position: absolute;
-		right: 15px;
-		top: 30px;
-	}
-	
-	#all_table_products .th_article,
-	#all_table_products .th_name,
-	#all_table_products .th_info,
-	#all_table_products .th_add_to_cart,
-	#all_table_products .th_color
-	{
-		display:none;
-	}
-	
-	#all_table_products .products_table_block_caption{
-		display:block;
-		text-align:center;
-		line-height: 1.4em;
-	}
+    /* Скрыть шапку */
+    #all_table_products > thead {
+        display: none;
+    }
 
-	#all_table_products .th_manufacturer:before{
-		content:'Сортировать:';
-		font-weight:bold;
-		color:#000;
-		display:block;
-		margin-bottom:2px;
-	}
-	
-	#all_table_products,
-	#all_table_products > thead,
-	#all_table_products > tbody,
-	#all_table_products > thead > tr,
-	#all_table_products > tbody > tr
-	{
-		display:block;
-		overflow:hidden;
-		width:100%;
-	}
-	
-	#all_table_products > tbody > tr{
-		text-align:right;
-		position: relative;
-		overflow: hidden;
-	}
-	
-	#all_table_products > thead > tr > th,
-	#all_table_products > tbody > tr > td
-	{
-		display:inline-block;
-		padding:5px;
-	}
-	
-	#all_table_products > tbody > tr > td
-	{
-		padding:0px;
-	}
-	
-	#all_table_products .td_manufacturer,
-	#all_table_products .td_article
-	{
-		float: left;
-		padding-right:15px;
-	}
-	
-	#all_table_products .td_manufacturer,
-	#all_table_products .td_article,
-	#all_table_products .td_name
-	{
-		border:none;
-	}
-	
-	#all_table_products .td_name
-	{
-		clear: both;
-		text-align: left;
-	}
-	
-	#all_table_products .td_name > span
-	{
-		display:block;
-		border-bottom:1px solid #ddd;
-		margin-bottom:5px;
-	}
-	
-	#all_table_products .td_name
-	{
-		display:block;
-		color: #7d7d7d;
-	}
-	
-	#all_table_products .td_price:after{
-		content:"";
-		display:block;
-	}
-	
-	#all_table_products .td_price
-	{
-		font-weight:bold;
-	}
-	
-	#all_table_products .td_color{
-		width: 5px;
-		padding: 0;
-		height: 50px;
-	}
-	
-	#all_table_products .td_exist
-	{
-		width:50px;
-	}
-	
-	#all_table_products .td_time_to_exe
-	{
-		width:80px;
-		text-align:center;
-	}
-	
-	#all_table_products .td_price
-	{
-		width: 75px;
-		padding-left: 0;
-		text-align:center;
-		color: #000;
-	}
-	
-	#all_table_products .td_add_to_cart
-	{
-		width:60px;
-	}
-	
-	.td_manufacturer,
-	.td_article{
-		color: #000;
-		font-weight:bold;
-	}
-	
-	.td_manufacturer > span,
-	.td_article > a{
-		margin-top: 30px;
-		display: inline-block;
-	}
-	
-	#all_table_products .next_page_box{
-		display:block;
+    /* Каждая строка — грид */
+    #all_table_products > tbody > tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 5px;
+        grid-template-rows: auto auto auto auto;
+        border-bottom: 1px solid #ddd;
+        padding: 5px 0;
+        position: relative;
+    }
+
+    #all_table_products > tbody > tr > td {
+        padding: 3px 5px;
+        border: none;
+        text-align: left;
+        background: transparent;
+    }
+
+    /* Цветовая полоса — справа на всю высоту */
+    #all_table_products > tbody > tr > td.td_color {
+        grid-row: 1 / -1;
+        grid-column: 6 / 7;
+        padding: 0;
+        width: 5px;
+        height: auto;
+        min-height: 100%;
+    }
+
+    /* ===== Первая строка (не скрытая) ===== */
+    #all_table_products > tbody > tr:not(.hide_row) > td.td_manufacturer {
+        grid-row: 1;
+        grid-column: 1 / 5; /* занимает 4 колонки */
+        display: block;
+    }
+    #all_table_products > tbody > tr:not(.hide_row) > td.td_manufacturer > span {
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    #all_table_products > tbody > tr:not(.hide_row) > td.td_article {
+        grid-row: 1;
+        grid-column: 5 / 6; /* пятая колонка */
+    }
+    #all_table_products > tbody > tr:not(.hide_row) > td.td_article a {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    /* ===== Вторая строка: название товара ===== */
+    #all_table_products > tbody > tr > td.td_name {
+        grid-row: 2;
+        grid-column: 1 / 6;
+        border-bottom: none !important;
+		border-top: none !important;
+        margin-bottom: 5px;
+		font-size: 14px;
+    }
+
+    /* ===== Третья строка: срок, наличие, цена ===== */
+    #all_table_products > tbody > tr > td.td_time_to_exe {
+        grid-row: 3;
+        grid-column: 1 / 2;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    #all_table_products > tbody > tr > td.td_exist {
+        grid-row: 3;
+        grid-column: 2 / 4;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+    #all_table_products > tbody > tr > td.td_price {
+        grid-row: 3;
+        grid-column: 4 / 6;
+        font-weight: bold;
+        display: flex;
+		flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+		
+    }
+
+    /* td_info — скрываем */
+    #all_table_products > tbody > tr > td.td_info {
+        display: none;
+    }
+
+    /* ===== Четвёртая строка: кнопка «В корзину» ===== */
+    #all_table_products > tbody > tr > td.td_add_to_cart {
+        grid-row: 4;
+        grid-column: 1 / 6;
+        text-align: left;
+    }
+
+    /* ===== Скрытые строки (без бренда и артикула) ===== */
+    #all_table_products > tbody > tr.hide_row > td.td_manufacturer,
+    #all_table_products > tbody > tr.hide_row > td.td_article {
+        display: none;
+    }
+    #all_table_products > tbody > tr.hide_row > td.td_name {
+        grid-row: 1;
+        grid-column: 1 / 6;
+    }
+    #all_table_products > tbody > tr.hide_row > td.td_time_to_exe {
+        grid-row: 2;
+        grid-column: 1 / 2;
+    }
+    #all_table_products > tbody > tr.hide_row > td.td_exist {
+        grid-row: 2;
+        grid-column: 2 / 4;
+    }
+    #all_table_products > tbody > tr.hide_row > td.td_price {
+        grid-row: 2;
+        grid-column: 4 / 6;
+    }
+    #all_table_products > tbody > tr.hide_row > td.td_add_to_cart {
+        grid-row: 3;
+        grid-column: 1 / 6;
+    }
+
+    /* ===== Управление видимостью версий корзины ===== */
+    #all_table_products .desktop-cart-wrapper {
+        display: none;
+    }
+    #all_table_products .mobile-cart-wrapper {
+        display: block;
+        width: 100%;
+    }
+
+    /* ===== Стили для мобильной кнопки ===== */
+	#all_table_products .mobile-cart-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    #all_table_products .mobile-manager-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+    }
+    #all_table_products .storage-caption {
+        font-size: 12px;
+        color: #333;
+        margin-right: 4px;
+    }
+
+    /* Стиль самой кнопки (был, но оставляем) */
+    #all_table_products .mobile-cart-wrapper .mobile-cart-button {
+        display: inline-block;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #fff;
+        background-color: #337ab7;
+        border: 1px solid #2e6da4;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    #all_table_products .mobile-cart-wrapper .mobile-cart-button:hover {
+        background-color: #286090;
+        border-color: #204d74;
+    }
+    #all_table_products .mobile-cart-wrapper .mobile-cart-button {
+        display: inline-block;
+        padding: 4px 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #fff;
+        background-color: #337ab7;
+        border: 1px solid #2e6da4;
+        border-radius: 4px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    #all_table_products .mobile-cart-wrapper .mobile-cart-button:hover {
+        background-color: #286090;
+        border-color: #204d74;
+    }
+
+    /* ===== Дополнительные корректировки ===== */
+
+    /* Кнопка "Показать ещё" — под брендом */
+    .show_hide_button {
+        position: static !important;
+        margin-top: 2px;
+    }
+
+    /* Таблица наличия – убираем float */
+    #all_table_products > tbody > tr > td.td_exist table {
+        float: none;
+        width: 100%;
+    }
+    #all_table_products > tbody > tr > td.td_exist table tbody tr {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 5px;
+    }
+
+    /* Заголовок блока на всю ширину */
+    #all_table_products .products_table_block_caption {
+        display: block;
+        width: 100% !important;
+        max-width: 100%;
+        grid-column: 1 / -1 !important;
+        text-align: center;
+        line-height: 1.4em;
+        box-sizing: border-box;
+    }
+	#all_table_products .product-return-icon {
+		margin-top: -6px;
 	}
 }
-
 
 
 /* ОБЫЧНОЕ ОТОБРАЖЕНИЕ ДАННЫХ */

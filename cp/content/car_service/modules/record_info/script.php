@@ -409,6 +409,7 @@
 
 	// Обновление общей суммы и количества
 	function updateTotals() {
+		console.log('update totals');
 		let totalQuantity = 0;
 		let totalSum = 0;
 		let totalRate = 0;

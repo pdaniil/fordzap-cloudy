@@ -4065,8 +4065,10 @@ else//Действий нет - выводим страницу
 
 
             // Вставка кнопки рядом с "Артикул"
-
-            $('label:contains("Артикул")').next('.col-lg-8').append(buttonHTML);
+			const btn_ai_gen = '<button id="fillDataButton" class="btn btn-primary" style=""><span id="fillDataSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style=""></span>Заполнить данные AI</button>';
+            $('label:contains("Артикул")').next('.col-lg-8').append(btn_ai_gen);
+			$('label:contains("Артикул")').next('.col-lg-8').append(buttonHTML);
+            
 
             $('label:contains("Состояние")').next('.col-lg-8').append(btnNew);
 
@@ -7231,3 +7233,182 @@ else//Действий нет - выводим страницу
 }
 
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const button = document.getElementById('fillDataButton');
+    const spinner = document.getElementById('fillDataSpinner');
+
+    function findFieldByLabel(labelText, selector) {
+        const labels = document.querySelectorAll('label');
+        for (let label of labels) {
+            if (label.textContent.trim() === labelText) {
+                const parent = label.closest('.col-lg-12');
+                if (parent) {
+                    return parent.querySelector(selector);
+                }
+            }
+        }
+        return null;
+    }
+
+    function getValues() {
+        const articleInput = findFieldByLabel('Артикул', 'input[type="text"]');
+        if (!articleInput) {
+            alert('Поле "Артикул" не найдено!');
+            return null;
+        }
+        const article = articleInput.value.trim();
+        if (!article) {
+            alert('Введите артикул!');
+            return null;
+        }
+
+        const brandSelect = findFieldByLabel('Производитель', 'select');
+        const manualBrandInput = findFieldByLabel('Производитель', 'input[placeholder="Ручной ввод..."]');
+        let brand = '';
+        if (manualBrandInput && manualBrandInput.value.trim() !== '') {
+            brand = manualBrandInput.value.trim();
+        } else if (brandSelect) {
+            const selectedOption = brandSelect.options[brandSelect.selectedIndex];
+            if (selectedOption) {
+                brand = selectedOption.text.trim();
+            }
+        }
+        if (!brand) {
+            alert('Выберите или введите производителя!');
+            return null;
+        }
+        return { article, brand };
+    }
+
+    function formatFitment(fitmentItem) {
+        const manufacturer = fitmentItem.manufacturer?.description || '';
+        const model = fitmentItem.model?.fullDescription || '';
+        const vehicle = fitmentItem.vehicle?.description || '';
+        const years = fitmentItem.years;
+        const yearStr = (years && years.from && years.to) ? `${years.from} — ${years.to}` : '';
+        return [manufacturer, model, vehicle, yearStr].filter(Boolean).join(' · ');
+    }
+
+    async function fillData() {
+        const values = getValues();
+        if (!values) return;
+
+        const { article, brand } = values;
+
+        spinner.style.display = 'inline-block';
+        button.disabled = true;
+
+        try {
+            // 1. GET через прокси
+            const lookupUrl = `/proxy.php?path=article-resolve/lookup-bridge&article=${encodeURIComponent(article)}&brand=${encodeURIComponent(brand)}&maxFitment=20`;
+            const lookupResponse = await fetch(lookupUrl);
+            if (!lookupResponse.ok) throw new Error(`Ошибка lookup-bridge: ${lookupResponse.status}`);
+            const lookupData = await lookupResponse.json();
+
+            const productName = lookupData.article?.product?.description || '';
+            const attributes = lookupData.attributes || [];
+            const oeByManufacturer = lookupData.oe_by_manufacturer || [];
+            const fitment = lookupData.fitment || [];
+
+            let oemSamples = [];
+            for (const item of oeByManufacturer) {
+                const mfr = item.manufacturer?.description || '';
+                const oes = item.oe || [];
+                for (const oe of oes) {
+                    if (oemSamples.length >= 10) break;
+                    oemSamples.push(`${mfr}: ${oe}`);
+                }
+                if (oemSamples.length >= 10) break;
+            }
+
+            const fitmentSamples = fitment.slice(0, 10).map(formatFitment);
+            const attrsForPost = attributes.map(attr => ({
+                name: attr.description || '',
+                value: attr.displayValue || ''
+            }));
+
+            // 2. POST через прокси
+            const postData = {
+                article: article,
+                brand: brand,
+                product_name: productName,
+                attributes: attrsForPost,
+                oem_samples: oemSamples,
+                fitment_samples: fitmentSamples
+            };
+
+            const aiResponse = await fetch('/proxy.php?path=article-resolve/ai-generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(postData)
+            });
+            if (!aiResponse.ok) throw new Error(`Ошибка ai-generate: ${aiResponse.status}`);
+            const aiData = await aiResponse.json();
+
+            // Заполнение полей
+            const captionTextarea = document.getElementById('caption_input');
+            if (captionTextarea) {
+                captionTextarea.value = productName;
+                if (typeof initFieldsByCaption === 'function') {
+                    initFieldsByCaption();
+                }
+            }
+
+            
+            
+                let html = '';
+                if (aiData.selling_description) {
+                    html += `<h3>Описание</h3><p>${aiData.selling_description}</p>`;
+                }
+                if (attributes.length) {
+                    html += `<h3>Характеристики</h3><ul>`;
+                    attributes.forEach(attr => {
+                        const name = attr.description || '';
+                        const value = attr.displayValue || '';
+                        if (name && value) {
+                            html += `<li><strong>${name}:</strong> ${value}</li>`;
+                        }
+                    });
+                    html += `</ul>`;
+                }
+                if (fitmentSamples.length) {
+                    html += `<h3>Применимость</h3><ul>`;
+                    fitmentSamples.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += `</ul>`;
+                }
+                if (oemSamples.length) {
+                    html += `<h3>Аналоги (OEM)</h3><ul>`;
+                    oemSamples.forEach(item => {
+                        html += `<li>${item}</li>`;
+                    });
+                    html += `</ul>`;
+                }
+                if (aiData.packaging_dimensions) {
+                    const dims = aiData.packaging_dimensions;
+                    html += `<h3>Габариты упаковки</h3><p>`;
+                    if (dims.length) html += `Длина: ${dims.length}<br>`;
+                    if (dims.width) html += `Ширина: ${dims.width}<br>`;
+                    if (dims.height) html += `Высота: ${dims.height}<br>`;
+                    if (dims.weight) html += `Вес: ${dims.weight}<br>`;
+                    if (dims.basis) html += `Примечание: ${dims.basis}`;
+                    html += `</p>`;
+                }
+				
+				tinymce.get('tinymce_editor').setContent(html);
+				alert('Данные загружены');
+        } catch (error) {
+            alert(`Произошла ошибка: ${error.message}`);
+            console.error(error);
+        } finally {
+            spinner.style.display = 'none';
+            button.disabled = false;
+        }
+    }
+
+    button.addEventListener('click', fillData);
+});
+</script>

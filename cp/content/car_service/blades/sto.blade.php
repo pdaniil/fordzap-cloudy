@@ -22,6 +22,10 @@
 					<div class="panel_a_img" style="background-color: #ffc500;width:96px;height:96px;display:table-cell;vertical-align:middle;"><i class="fas fa-ruble-sign" style="color:#FFF;font-size:45px"></i></div>
 					<div class="panel_a_caption">Услуги</div>
 				</a>
+				<a class="panel_a" href="/<?php echo $DP_Config->backend_dir; ?>/car_service/shift-schedule">
+					<div class="panel_a_img" style="background-color: #8918FF;width:96px;height:96px;display:table-cell;vertical-align:middle;"><i class="fas fa-users-cog" style="color:#FFF;font-size:45px"></i></div>
+					<div class="panel_a_caption">График смен</div>
+				</a>
 			<?php endif; ?>
 		</div>
 	</div>

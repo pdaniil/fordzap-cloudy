@@ -60,3 +60,11 @@ composer.phar
 *.csv
 *.docx
 *.xlsx
+
+*.log.txt
+*_log.txt
+log.txt
+log_*.txt
+content/cron/cron_update_products_limit_log.txt
+cp/content/shop/sao/result.txt
+content/shop/docpart/suppliers_handlers/treelax_catalogue/log*.txt 

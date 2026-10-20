@@ -437,8 +437,9 @@ else//Действий нет - выводим страницу
 							<div class="col-lg-6">
 								<select name="office_id" class="form-control">
 									<?php
-									$offices_query = $db_link->prepare("SELECT * FROM `shop_offices`;");
-									$offices_query->execute();
+									$admin_id = DP_User::getAdminId();
+									$offices_query = $db_link->prepare("SELECT * FROM `shop_offices`  WHERE users LIKE CONCAT('%\"', :user_id, '\"%')");
+									$offices_query->execute([':user_id' => $admin_id]);
 									while( $office = $offices_query->fetch() )
 									{
 										?>
